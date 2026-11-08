@@ -1,0 +1,131 @@
+/* Dùng lại token màu của game gốc (--ink, --paper, --gold...) để hòa cùng phong cách pixel. */
+/* Dùng cả id vì .panel của game nạp sau và sẽ ghi đè padding nếu chỉ dùng class. */
+#vk2-hud.vk2-hud { position: relative; margin: 0; padding: 2px 8px; z-index: 20; box-shadow: none; border-width: 0 0 3px; }
+.vk2-hud-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.vk2-hud-tabs { display: flex; gap: 6px; flex: none; }
+#vk2-hud .vk2-hud-toggle { min-width: 0; text-align: left; flex: 1; padding: 0 2px; line-height: 1.15; }
+.vk2-hud-toggle:disabled { cursor: default; }
+.vk2-hud-next { display: block; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vk2-hud-next i { font-style: normal; font-variant-numeric: tabular-nums; }
+/* Phủ tạm lên nhật ký thay vì đẩy nó đi, để khung "Gia phả" của game luôn giữ nguyên chiều cao. */
+.vk2-hud-list { position: absolute; top: 100%; left: 0; right: 0; display: grid; gap: 8px; padding: 8px; background: var(--paper); border-bottom: 3px solid var(--ink); box-shadow: 0 6px 0 rgba(31, 22, 13, 0.25); max-height: min(60dvh, 440px); overflow-y: auto; }
+.vk2-link { background: none; border: 0; padding: 6px 2px; font: inherit; color: var(--ink); cursor: pointer; min-height: 36px; }
+.vk2-link em { font-style: normal; background: var(--red); color: var(--paper-3); padding: 0 6px; font-weight: 700; }
+.vk2-btn { font: inherit; font-size: 14px; font-weight: 600; color: var(--ink); background: var(--paper-3); border: 2px solid var(--ink); box-shadow: 2px 2px 0 var(--shadow); padding: 4px 10px; min-height: 36px; cursor: pointer; }
+.vk2-btn:hover:not(:disabled) { background: var(--gold-l); }
+.vk2-btn:active:not(:disabled) { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--shadow); }
+.vk2-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.vk2-btn:focus-visible, .vk2-link:focus-visible, .vk2-pin:focus-visible, .vk2-x:focus-visible, .vk2-tabs button:focus-visible { outline: 3px solid var(--gold); outline-offset: 1px; }
+.vk2-claim { background: var(--gold-l); }
+.vk2-q { border: 2px solid var(--shadow); background: var(--paper-3); padding: 6px 8px; min-width: 0; flex: 1; }
+.vk2-q.is-done { border-color: var(--gold); }
+.vk2-q-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.vk2-q-name { overflow-wrap: anywhere; }
+.vk2-q-num { font-variant-numeric: tabular-nums; color: var(--muted); white-space: nowrap; }
+.vk2-q-bot { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 4px; }
+.vk2-q-bot small { color: var(--muted); overflow-wrap: anywhere; }
+.vk2-q-bot .vk2-btn { flex: none; }
+.vk2-bar { height: 8px; background: var(--paper-2); border: 2px solid var(--ink); margin-top: 4px; }
+.vk2-bar i { display: block; height: 100%; background: var(--jade); transition: width 0.25s; }
+.is-done .vk2-bar i { background: var(--gold); }
+
+.vk2-modal { position: fixed; inset: 0; z-index: 10000; background: rgba(31, 22, 13, 0.55); display: flex; align-items: center; justify-content: center; padding: 12px; }
+.vk2-sheet { background: var(--paper); color: var(--ink); border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--shadow); width: 100%; max-width: 640px; max-height: 100%; display: flex; flex-direction: column; min-height: 0; font-family: var(--font); }
+.vk2-sheet-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; border-bottom: 3px solid var(--ink); padding: 8px; }
+.vk2-sheet-body { overflow-y: auto; padding: 10px 12px 16px; min-height: 0; }
+.vk2-sheet-body h3 { margin: 14px 0 6px; font-size: 17px; }
+.vk2-sheet-body h3:first-child { margin-top: 0; }
+.vk2-sheet-body h3 small { font-weight: 400; color: var(--muted); }
+.vk2-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+.vk2-tabs button { font: inherit; font-weight: 600; color: var(--ink); background: var(--paper-2); border: 2px solid var(--ink); padding: 4px 12px; min-height: 40px; cursor: pointer; }
+.vk2-tabs button.on { background: var(--ink); color: var(--paper); }
+.vk2-x { font: inherit; background: var(--paper-3); border: 2px solid var(--ink); width: 40px; height: 40px; cursor: pointer; flex: none; }
+.vk2-note { margin: 4px 0 8px; color: var(--muted); font-size: 14px; }
+.vk2-note .vk2-link { min-height: 0; padding: 0; text-decoration: underline; }
+.vk2-q-wrap { display: flex; align-items: stretch; gap: 6px; margin-bottom: 6px; }
+.vk2-pin { font: inherit; font-size: 18px; color: var(--muted); background: var(--paper-3); border: 2px solid var(--shadow); width: 40px; flex: none; cursor: pointer; }
+.vk2-pin.on { color: var(--gold); border-color: var(--gold); }
+.vk2-closed { margin: 4px 0; color: var(--muted); font-size: 14px; }
+.vk2-closed summary { cursor: pointer; padding: 4px 0; }
+.vk2-closed ul { margin: 2px 0; padding-left: 18px; }
+
+.vk2-t-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; }
+.vk2-t { border: 2px solid var(--shadow); background: var(--paper-3); padding: 8px; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.vk2-t.on { border-color: var(--jade); box-shadow: inset 0 0 0 1px var(--jade); }
+.vk2-t.locked { background: var(--paper-2); }
+.vk2-t.locked .vk2-ic { filter: grayscale(1) opacity(0.65); }
+.vk2-t p { margin: 2px 0; font-size: 14px; }
+.vk2-t small { color: var(--muted); }
+.vk2-t .vk2-past { color: var(--jade); }
+.vk2-t-head { display: flex; gap: 8px; align-items: center; }
+.vk2-ic { image-rendering: pixelated; flex: none; }
+.vk2-qual { font-size: 12px; font-weight: 700; padding: 0 5px; border: 1px solid currentColor; }
+.vk2-qual.q1 { color: var(--muted); }
+.vk2-qual.q2 { color: var(--jade); }
+.vk2-qual.q3 { color: var(--chinh); }
+.vk2-qual.q4 { color: var(--red); }
+.vk2-t-act { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.vk2-branch { display: grid; gap: 6px; margin-top: 4px; }
+.vk2-branch .vk2-btn { text-align: left; display: grid; }
+
+.vk2-els { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+.vk2-el { padding: 4px 12px; border: 2px dashed var(--shadow); color: var(--muted); font-weight: 600; }
+.vk2-el.has { border-style: solid; color: var(--paper-3); border-color: var(--ink); }
+.vk2-el.el-kim.has { background: #8a7a3a; }
+.vk2-el.el-moc.has { background: var(--jade); }
+.vk2-el.el-thuy.has { background: var(--chinh); }
+.vk2-el.el-hoa.has { background: var(--red); }
+.vk2-el.el-tho.has { background: var(--brown); }
+.vk2-aff { border-collapse: collapse; font-size: 14px; }
+.vk2-aff th, .vk2-aff td { text-align: left; padding: 2px 12px 2px 0; }
+
+#vk2-toasts { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 10010; display: grid; gap: 6px; width: min(92vw, 420px); pointer-events: none; }
+.vk2-toast { background: var(--ink); color: var(--paper); border: 2px solid var(--ink-dark); padding: 6px 10px; font-family: var(--font); font-size: 15px; animation: vk2-in 0.2s ease-out; }
+.vk2-toast.good { border-color: var(--gold); }
+.vk2-toast.awake { background: var(--red-d); border-color: var(--gold-l); font-weight: 700; }
+@keyframes vk2-in { from { opacity: 0; transform: translateY(-6px); } }
+.vk2-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 6px; }
+.vk2-facts > div { background: var(--paper-3); border: 2px solid var(--shadow); padding: 4px 8px; min-width: 0; }
+.vk2-facts small { display: block; color: var(--muted); }
+.vk2-facts b { overflow-wrap: anywhere; }
+.vk2-sheet-body p { margin: 4px 0; }
+.vk2-time { display: grid; gap: 4px; }
+.vk2-time-row { display: grid; grid-template-columns: 78px 1fr auto; gap: 8px; align-items: center; }
+.vk2-time-row .vk2-bar { margin: 0; }
+.vk2-time-row b { font-variant-numeric: tabular-nums; }
+.vk2-near, .vk2-lives { margin: 2px 0; padding-left: 18px; font-size: 15px; }
+.vk2-lives { list-style: none; padding: 0; display: grid; gap: 6px; }
+.vk2-lives li { background: var(--paper-3); border: 2px solid var(--shadow); padding: 6px 8px; overflow-wrap: anywhere; }
+.vk2-lives small { color: var(--muted); }
+.vk2-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.vk2-btn.on, .vk2-btn.on:hover:not(:disabled) { background: var(--ink); color: var(--paper); }
+.vk2-log { list-style: none; margin: 0; padding: 0; background: var(--paper-3); border: 2px solid var(--shadow); }
+.vk2-log-item { display: flex; gap: 10px; padding: 8px; font-size: 17px; line-height: 1.4; color: var(--ink); border-top: 2px dotted var(--shadow); }
+.vk2-log-item:first-child { border-top: 0; }
+.vk2-log-item > span:last-child { overflow-wrap: anywhere; min-width: 0; }
+.vk2-log-age { flex: none; width: 40px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.vk2-log-item.tone-big { font-weight: 700; }
+.vk2-log-item.tone-good, .vk2-log-item.tone-chinh { border-left: 4px solid var(--jade); }
+.vk2-log-item.tone-bad, .vk2-log-item.tone-ta { border-left: 4px solid var(--red); }
+.vk2-more { width: 100%; margin-top: 6px; }
+@media (prefers-reduced-motion: reduce) { .vk2-toast { animation: none; } .vk2-bar i { transition: none; } }
+/* Điện thoại xoay ngang: cột game rộng 460px còn chừa lề hai bên, nên đưa bảng ra lề thay vì chiếm chiều cao. */
+@media (max-height: 520px) and (min-width: 640px) {
+  #vk2-hud.vk2-hud { position: fixed; top: 8px; left: 4px; width: 84px; margin: 0; padding: 4px; z-index: 40; border-width: 3px; }
+  .vk2-hud-head { flex-direction: column; align-items: stretch; gap: 4px; }
+  .vk2-hud-tabs { flex-direction: column; gap: 4px; }
+  .vk2-hud .vk2-btn { padding: 4px 2px; font-size: 13px; }
+  #vk2-hud .vk2-hud-toggle { pointer-events: none; text-align: center; padding: 2px 0; min-height: 0; flex: none; }
+  .vk2-hud-toggle > span, .vk2-hud-next { display: none; }
+}
+/* Điện thoại thấp: khung cảnh nhường chỗ để nhật ký đọc được nhiều dòng hơn. Không áp dụng lúc có sự kiện. */
+@media (max-width: 480px) and (max-height: 700px) {
+  html .game:not(.has-event) .stage > .scene { height: 112px; min-height: 104px; }
+  html .game:not(.has-event) .sprite-wrap .sprite { width: 104px; height: 104px; }
+}
+@media (max-width: 480px) {
+  .vk2-modal { padding: 0; }
+  .vk2-sheet { max-width: none; height: 100%; border-width: 0; box-shadow: none; }
+  .vk2-q-bot { flex-wrap: wrap; }
+  .vk2-t-grid { grid-template-columns: 1fr; }
+}

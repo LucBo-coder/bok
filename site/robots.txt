@@ -1,0 +1,5 @@
+User-Agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: https://van-kiep-luan-hoi.vercel.app/sitemap.xml

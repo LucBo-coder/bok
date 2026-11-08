@@ -1,0 +1,13 @@
+# Chỉ đưa lên những gì cần để dựng và phát triển game.
+# Nguồn dựng là site/; bản sao asset ở thư mục gốc, code đã prettify và log crawl không cần lên repo.
+/*
+!/.github/
+!/.gitignore
+!/README.md
+!/build_mod.py
+!/serve_mod.py
+!/site/
+!/vk2/
+!/docs/
+__pycache__/
+node_modules/
