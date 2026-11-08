@@ -79,3 +79,9 @@ Giới hạn đã biết:
 - Đóng trang bình thường: giữ nguyên tên, tuổi, nhật ký và tiến trình nhiệm vụ.
 - Tắt đột ngột: nhân vật còn, nhưng mất phần sau lần lưu gần nhất (lần thử: tuổi 9 về 8).
 - Chưa thử trên điện thoại thật và trên Safari.
+
+## Site thật trên GitHub Pages (09/11/2026)
+
+Chạy trên https://lucbo-coder.github.io/bok/play/choi/ bằng Edge headless giả lập điện thoại: `pages.js` 21/21, `mobile.js` 38/38, `restart.js` 7/7. Link gốc `/bok/` tự chuyển vào game.
+
+Chưa thử trên điện thoại thật và trên Safari. Mục "Máy chủ giả lập khác Pages thật" ở trên đã được kiểm chứng bằng các lượt chạy này.

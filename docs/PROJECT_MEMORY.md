@@ -46,3 +46,7 @@ node --test vk2/tests/core.test.js
 ## Save chế độ khách (09/11/2026)
 
 Save nằm trong localStorage (`vkl.save`, `vkl.meta`, `vk2.acct.guest`). Game tự lưu khi trang bị ẩn hoặc đóng. Mod gọi `navigator.storage.persist()` lúc khởi động để giảm khả năng trình duyệt tự xóa, nhưng trình duyệt có thể từ chối. Xóa dữ liệu duyệt web hoặc dùng tab ẩn danh thì mất save, và chưa có chức năng sao lưu ra file.
+
+## Cách site được đăng (09/11/2026)
+
+Pages đang ở chế độ deploy từ gốc nhánh `main`, nên bản dựng được commit vào `play/` với `--base /bok/play`. Sau mỗi thay đổi ở `vk2/` hoặc `site/` phải chạy `python build_mod.py --base /bok/play --out play` rồi commit; `check.yml` báo lỗi nếu quên. `404.html` ở gốc chuyển mọi đường dẫn lạ vào game. Bản chạy local vẫn dựng vào `site-mod/`, không có tiền tố.

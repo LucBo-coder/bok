@@ -58,7 +58,7 @@ GĐ3 tu luyện chuyên sâu · GĐ4 thế giới · GĐ5 nhân quả và luân 
 
 ## Phạm vi hiện tại
 
-Cập nhật 09/11/2026: chủ dự án yêu cầu đưa bản sandbox lên GitHub Pages (repo `LucBo-coder/bok`). Bản này vẫn không có backend, nên đăng nhập, lưu đám mây, bảng xếp hạng và lôi đài không hoạt động.
+Cập nhật 09/11/2026: bản sandbox đã chạy trên GitHub Pages tại https://lucbo-coder.github.io/bok/play/choi/ để chơi bằng điện thoại. Bản này vẫn không có backend, nên đăng nhập, lưu đám mây, bảng xếp hạng và lôi đài không hoạt động.
 
 Chủ dự án chốt ngày 09/11/2026: chỉ chạy local trên máy tính và điện thoại, không làm backend. Vì vậy các mục phía server ở trên không còn là việc cần làm, và việc gian lận qua localStorage được chấp nhận. Sandbox giữ nguyên.
 
