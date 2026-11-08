@@ -605,6 +605,9 @@
   };
 
   function boot() {
+    // Chế độ khách chỉ có save trong máy, nên xin trình duyệt đừng tự xóa khi thiếu dung lượng.
+    // Không có trên HTTP thường (chơi qua LAN); bị từ chối thì save vẫn hoạt động như cũ.
+    navigator.storage?.persist?.().catch(() => {});
     setInterval(step, 500);
     step();
   }

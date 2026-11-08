@@ -42,3 +42,7 @@ node --test vk2/tests/core.test.js
 - **Tab Hành trình:** gom cảnh giới, đạo lộ, thời gian dành cho từng việc, mục tiêu kế tiếp, nhật ký có bộ lọc và các kiếp trước. Lịch sử kiếp lưu ở `acct.history`, tối đa 30 kiếp, ghi từ lần chết đầu tiên sau bản này.
 - **Pages:** `build_mod.py --base /bok` thêm tiền tố vào mọi đường dẫn tuyệt đối trong HTML, JS và CSS. Danh sách đường dẫn nằm ở `ROUTES` và `ASSETS`; thêm route mới thì phải thêm vào đó, và `vk2/tests/pages.js` sẽ báo nếu sót.
 - **Save trên Pages** nằm theo trình duyệt và theo origin `lucbo-coder.github.io`, không chung với save ở bản local.
+
+## Save chế độ khách (09/11/2026)
+
+Save nằm trong localStorage (`vkl.save`, `vkl.meta`, `vk2.acct.guest`). Game tự lưu khi trang bị ẩn hoặc đóng. Mod gọi `navigator.storage.persist()` lúc khởi động để giảm khả năng trình duyệt tự xóa, nhưng trình duyệt có thể từ chối. Xóa dữ liệu duyệt web hoặc dùng tab ẩn danh thì mất save, và chưa có chức năng sao lưu ra file.

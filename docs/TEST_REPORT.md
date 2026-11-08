@@ -71,3 +71,11 @@ Giới hạn đã biết:
 - **Sprite thiếu trong bundle:** khoảng 20 đến 24 lớp ảnh nhân vật trả 404 mỗi lượt chạy. Một phần là game cố ý thử `idle.png` rồi lùi về `walk.png`, phần còn lại không có trong bản scrape (ví dụ `lpc/hairc_parted_side_bangs/walk.png`), nên một số nhân vật hiện thiếu tóc hoặc áo. Lỗi có từ bundle, không do đường dẫn.
 - **Máy chủ giả lập khác Pages thật:** kết quả thật trên github.io được ghi ở `docs/PROJECT_MEMORY.md` sau khi deploy.
 - **Chưa thử trên điện thoại thật;** các số liệu mobile đến từ giả lập.
+
+## Save của chế độ khách (09/11/2026)
+
+`vk2/tests/restart.js`, hồ sơ trình duyệt thật trên đĩa, tắt hẳn trình duyệt rồi mở lại: 7/7 trên Edge headless, bản local.
+
+- Đóng trang bình thường: giữ nguyên tên, tuổi, nhật ký và tiến trình nhiệm vụ.
+- Tắt đột ngột: nhân vật còn, nhưng mất phần sau lần lưu gần nhất (lần thử: tuổi 9 về 8).
+- Chưa thử trên điện thoại thật và trên Safari.
