@@ -7,6 +7,9 @@
 !/build_mod.py
 !/serve_mod.py
 !/site/
+!/play/
+!/.nojekyll
+!/404.html
 !/vk2/
 !/docs/
 __pycache__/

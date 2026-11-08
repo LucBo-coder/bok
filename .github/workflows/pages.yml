@@ -1,8 +1,7 @@
 name: Deploy game to GitHub Pages
 
+# Chỉ dùng khi đổi Settings > Pages > Source sang GitHub Actions. Hiện site chạy từ thư mục play/ trên main.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:

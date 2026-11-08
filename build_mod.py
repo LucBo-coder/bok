@@ -10,7 +10,6 @@ import sys
 
 ROOT = pathlib.Path(__file__).parent
 SRC = ROOT / "site"
-OUT = ROOT / "site-mod"
 MOD = ROOT / "vk2"
 CHUNKS = "_next/static/immutable/chunks"
 HOOK = "globalThis.__VK2"
@@ -76,9 +75,14 @@ def game_tags(base):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--base", default="", help="Thư mục con khi deploy, ví dụ /bok")
-    base = parser.parse_args().base.rstrip("/")
-    if base and not re.fullmatch(r"/[A-Za-z0-9._-]+", base):
+    parser.add_argument("--out", default="site-mod", help="Thư mục kết quả, nằm ngay trong dự án và sẽ bị ghi đè")
+    args = parser.parse_args()
+    base = args.base.rstrip("/")
+    if base and not re.fullmatch(r"(/[A-Za-z0-9._-]+)+", base):
         sys.exit(f"--base không hợp lệ: {base}")
+    if args.out not in ("site-mod", "play"):
+        sys.exit(f"--out chỉ nhận site-mod hoặc play, tránh ghi đè nhầm: {args.out}")
+    OUT = ROOT / args.out
     if not SRC.is_dir():
         sys.exit("Thiếu site/. Chạy build_site.py trước.")
     if OUT.exists():

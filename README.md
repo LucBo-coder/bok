@@ -136,18 +136,15 @@ rồi mở `http://127.0.0.1:8790/choi/`.
 
 ## Chạy trên GitHub Pages
 
-Mỗi lần push lên `main`, workflow `.github/workflows/pages.yml` chạy unit test, dựng site với `--base /<tên repo>` rồi deploy. Lần đầu cần bật một lần: Settings → Pages → Source: **GitHub Actions**.
+Chơi tại https://lucbo-coder.github.io/bok/play/choi/ (cả máy tính và điện thoại).
 
-Bản Pages vẫn giữ sandbox: chơi được ở chế độ khách, save nằm trong trình duyệt của từng người. Đăng nhập, lưu đám mây, bảng xếp hạng và lôi đài không hoạt động.
-
-Thử cục bộ như trên Pages (chỉ phục vụ dưới tiền tố `/bok`):
+Pages đang lấy từ thư mục gốc của nhánh `main`, nên bản đã dựng được commit vào `play/`. **Sau khi sửa `vk2/` hoặc `site/`, phải dựng lại rồi commit `play/`**, nếu không site sẽ không đổi. Workflow `check.yml` báo lỗi nếu quên.
 
 ```bash
-python build_mod.py --base /bok
-BASE=/bok PORT=8777 python serve_mod.py   # http://127.0.0.1:8777/bok/choi/
+python build_mod.py --base /bok/play --out play   # Git Bash: thêm MSYS_NO_PATHCONV=1 phía trước
 ```
 
-Trong Git Bash, thêm `MSYS_NO_PATHCONV=1` trước hai lệnh trên, nếu không `/bok` sẽ bị đổi thành đường dẫn Windows.
+Bản này vẫn giữ sandbox: chơi ở chế độ khách, save nằm trong trình duyệt của từng thiết bị. Đăng nhập, lưu đám mây, bảng xếp hạng và lôi đài không hoạt động.
 
 ## Bản quyền
 
