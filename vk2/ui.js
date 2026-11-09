@@ -508,7 +508,90 @@
     return n;
   }
 
+  // ---------- Mục nối trong các bảng của game gốc ----------
+
+  const FIGHT_NAMES = { first: ["Đánh trước", "First strike"], extra: ["Đánh thêm", "Extra strike"], leech: ["Hút máu", "Drain"], dodge: ["Né đòn", "Dodge"], pierce: ["Xuyên giáp", "Pierce"], shield: ["Hộ thể", "Shield"], burn: ["Thiêu đốt", "Burn"] };
+  const pct = (x) => `${x > 0 ? "+" : ""}${Math.round(x * 100)}%`;
+  function fightLine(c) {
+    const m = C.duelMods(c);
+    return Object.keys(FIGHT_NAMES).filter((k) => m[k] > 0).map((k) => `${L(FIGHT_NAMES[k])} ${Math.round(m[k] * 100)}%`).join(" · ");
+  }
+  /** Mỗi bảng của game hiện đúng phần liên quan của mod đang tác động lên nhân vật, kèm nút mở bảng đầy đủ. */
+  const NATIVE = {
+    hunt: (c) => {
+      const armed = c.vk2?.khi?.armed;
+      const line = fightLine(c);
+      return {
+        text: `${T("Trong trận", "In battle")}: ${line || T("chưa có cơ chế nào. Pháp bảo, phù, bí thuật và pháp tắc sẽ thêm né đòn, hút máu, đánh thêm.", "no mechanics yet. Treasures, talismans, arts and laws add dodge, drain and extra strikes.")}${armed ? ` · ${T("Phù đã chuẩn bị", "Talisman ready")}: ${L(globalThis.VK2Khi.TALISMANS[armed].n)}` : ""}`,
+        tab: "forge", btn: T("Pháp bảo và phù", "Treasures and talismans"),
+      };
+    },
+    info: (c) => {
+      const t = C.totals(c);
+      const parts = [[["Công", "Atk"], t.atk], [["Thủ", "Def"], t.def], [["Máu", "HP"], t.hp], [["Tu", "Cult."], t.cult], [["Đột phá", "Breakthrough"], t.brk]].filter(([, x]) => Math.abs(x) >= 0.005);
+      const line = fightLine(c);
+      return {
+        text: `${T("Tu hành cộng", "From your practice")}: ${parts.map(([n, x]) => `${L(n)} ${pct(x)}`).join(" · ") || T("chưa có", "none yet")}${line ? ` · ${T("Trận", "Battle")}: ${line}` : ""}`,
+        tab: "journey", btn: T("Hành trình", "Journey"),
+      };
+    },
+    congphap: (c) => {
+      const arts = globalThis.VK2Dao?.activeArts(c) ?? [];
+      return {
+        text: `${T("Bí thuật tự sáng tạo đang vận hành", "Created arts in use")}: ${arts.map((x) => x.name).join(", ") || T("chưa có", "none yet")}`,
+        tab: "art", btn: T("Mở Bí thuật", "Open Arts"),
+      };
+    },
+    bag: (c) => {
+      const k = c.vk2?.khi;
+      const tali = Object.values(k?.talismans ?? {}).reduce((s, n) => s + n, 0);
+      return {
+        text: `${T("Pháp bảo", "Treasures")}: ${k?.worn?.length ?? 0}/${k?.items?.length ?? 0} ${T("đang mang", "worn")} · ${T("Phù", "Talismans")}: ${tali}`,
+        tab: "forge", btn: T("Luyện khí", "Forging"),
+      };
+    },
+    bequan: (c) => {
+      const can = c.vk2?.can;
+      const m = can && K.METHODS[can.method];
+      const cave = c.vk2?.khi?.cave;
+      return {
+        text: `${T("Căn cơ", "Foundation")}: ${m ? L(m.n) : T("chưa rõ", "unknown")} · ${T("Động phủ", "Abode")}: ${cave ? T("đã có", "established") : T("chưa có", "none")}`,
+        tab: "can", btn: T("Mở Căn Cơ", "Open Foundation"),
+      };
+    },
+    thu: (c) => {
+      const lv = c.vk2?.khi?.cave?.b?.thu_vien ?? 0;
+      return {
+        text: `${T("Linh thú viên", "Beast Garden")}: ${lv ? `${T("cấp", "level")} ${lv}, ${T("linh thú hồi sức cho chủ mỗi năm", "your beast restores you yearly")}` : T("chưa xây trong động phủ", "not built in your abode")}`,
+        tab: "cave", btn: T("Mở Động phủ", "Open Abode"),
+      };
+    },
+  };
+  function renderNative(c) {
+    const sheets = document.querySelectorAll(".sheet");
+    const sheet = sheets[sheets.length - 1];
+    // Tàng Kinh Các và Linh thú là cảnh toàn màn hình, phần nội dung giấy nằm cuối cảnh
+    const scene = document.querySelector(".forge-wrap .forge-scene")?.lastElementChild;
+    const make = bridge?.panel ? NATIVE[bridge.panel] : null;
+    if ((!sheet && !scene) || !make) return document.getElementById("vk2-native")?.remove();
+    const d = make(c);
+    const html = `<p>${esc(d.text)}</p><button class="vk2-btn" data-act="tab" data-tab="${d.tab}">${esc(d.btn)}</button>`;
+    const box = el("vk2-native", "div", "vk2-native");
+    if (scene) {
+      if (box.parentNode !== scene) scene.prepend(box);
+    } else if (box.parentNode !== sheet) {
+      const head = sheet.querySelector(".sheet-head");
+      if (head) head.after(box);
+      else sheet.prepend(box);
+    }
+    if (box.dataset.h !== html) {
+      box.innerHTML = html;
+      box.dataset.h = html;
+    }
+  }
+
   function hideAll() {
+    document.getElementById("vk2-native")?.remove();
     document.getElementById("vk2-hud")?.remove();
     document.getElementById("vk2-modal")?.remove();
     modal = null;
@@ -530,6 +613,7 @@
       hud.innerHTML = html;
       lastHtml = html;
     }
+    renderNative(c);
     if (modal) {
       const m = el("vk2-modal", "div", "vk2-modal");
       if (!m.parentNode) document.body.appendChild(m);
@@ -785,12 +869,17 @@
       return C.cultMul(c);
     }, 1),
     breakBonus: safe((c) => C.breakBonus(c), 0),
+    sectLean: safe((name) => globalThis.VK2The?.sectLean(acct(), name) ?? null, null),
+    fightFoe: safe((c, f, foe) => C.fightFoe(c, f, foe), (c, f, foe) => foe),
+    fightExtra: safe((f) => C.fightExtra(f), 0),
+    fightHit: safe((f, before) => C.fightHit(f, before)),
+    fightGuard: safe((f, before) => C.fightGuard(f, before)),
     stat: safe((c, s) => C.statMul(c, s), (c, s) => s),
     onKill: safe((c) => {
       C.onKill(c, acct());
     }),
     step,
-    _test: { acct, char, core: C, can: K, game: () => bridge?.game ?? null, render: () => render(true), rate: (c) => (nM ? nM(c) : null), useAcct: (a) => (testAcct = a) },
+    _test: { acct, char, core: C, can: K, game: () => bridge?.game ?? null, render: () => render(true), rate: (c) => (nM ? nM(c) : null), useAcct: (a) => (testAcct = a), openPanel: (id) => bridge?.openPanel(id) },
     // Dành cho ui3.js: dùng chung cách vẽ và lưu, không có API thứ hai.
     _ui: {
       char, acct, EXT, L, T, esc, fmt, meter, toast, commit, pushNotes, closeModal: () => closeModalIfAny(), fxText, rewardText, FX_NAMES,

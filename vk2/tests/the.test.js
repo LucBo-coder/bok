@@ -402,3 +402,40 @@ test("lưu qua JSON giữ nguyên thế giới và quan hệ", () => {
   H.fastForward(a2.world, 50);
   assert.equal(JSON.stringify(a.world), JSON.stringify(a2.world));
 });
+
+// ---------- Đồng bộ tông môn với game gốc ----------
+
+test("thế giới mới có đủ tông môn của game, đúng phe và không bị diệt", () => {
+  const a = C.newAcct();
+  const w = H.world(a, { lookSeed: 5, lifeNo: 1 });
+  for (const [n, lean] of [["Thanh Vân Tông", "chinh"], ["Thiên Cơ Các", "trung"], ["Huyết Sát Môn", "ta"], ["Hợp Hoan Tông", "ta"]]) {
+    assert.equal(w.sects[n]?.lean, lean, n);
+    assert.equal(w.sects[n].prot, true, n);
+  }
+});
+
+test("thế giới của save cũ được bổ sung một lần, không ghi đè tông đã có", () => {
+  const a = C.newAcct();
+  const w = H.world(a, { lookSeed: 5, lifeNo: 1 });
+  delete w.gameSects;
+  delete w.sects["Kiếm Cốc"];
+  w.sects["Thanh Vân Tông"].terr = 9;
+  w.sects["Thanh Vân Tông"].lean = "trung"; // Save cũ ghi sai phe khi người chơi vào tông
+  w.gone = [{ n: "Phổ Đà Sơn" }];
+  delete w.sects["Phổ Đà Sơn"];
+  H.world(a);
+  assert.ok(w.sects["Kiếm Cốc"]);
+  assert.equal(w.sects["Thanh Vân Tông"].terr, 9);
+  assert.equal(w.sects["Thanh Vân Tông"].lean, "chinh");
+  assert.equal(w.sects["Phổ Đà Sơn"], undefined, "tông đã diệt trong thế giới này không sống lại");
+});
+
+test("phe trả cho game: tông của mod theo mod, tông của game để game tự quyết", () => {
+  const a = C.newAcct();
+  H.world(a, { lookSeed: 5, lifeNo: 1 });
+  assert.equal(H.sectLean(a, "Vạn Thú Sơn"), "trung");
+  assert.equal(H.sectLean(a, "Thanh Hà Tông"), "chinh");
+  assert.equal(H.sectLean(a, "Thanh Vân Tông"), null);
+  assert.equal(H.sectLean(a, "Không có tông này"), null);
+  assert.equal(H.sectLean(C.newAcct(), "Vạn Thú Sơn"), null);
+});

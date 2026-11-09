@@ -71,7 +71,9 @@ Pages đang ở chế độ deploy từ gốc nhánh `main`, nên bản dựng �
 - **Sức mạnh cộng thêm** phải đi qua `fx`, tổng bị kẹp bởi `C.MOD_CAP` trong `totals`. Đừng cộng thẳng vào chỉ số.
 - **Cấp chiến đấu:** chênh một cấp đổi kết quả rất mạnh (đo: thắng 85% ở cùng cấp, 10% ở +2). Quái của mod phải tính từ `combatLevel`, không đoán con số.
 - `fx` không nhận `acct`, nên hiệu ứng từ thế giới được `refresh` chép vào nhân vật (`h.fx`).
-- Trận thời gian thực của game chỉ đọc chỉ số. Cơ chế `duel` chỉ có tác dụng trong trận tự động của mod.
+- Cơ chế `duel` có tác dụng ở cả trận tự động của mod (`C.duel`) và trận thời gian thực (`fightFoe`, `fightExtra`, `fightHit`, `fightGuard` trong `core.js`, gọi từ bản vá `n7`, `n8`). Trạng thái mỗi trận nằm ở `f.vk2`.
+- Thay đổi thọ nguyên phải cộng cả `lifeExtra`: game kẹp `lifespan` mỗi năm, phần chỉ cộng vào `lifespan` sẽ mất.
+- Mọi `c.sect` đều phải có phe: tông của game do game tự quyết, tông của mod trả qua hook `sectLean`.
 - **Khi kiểm thử giao diện:** nút lựa chọn của game có trạng thái `arming` ngay khi popup vừa hiện, cú bấm lúc đó có thể bị bỏ qua. Test phải chờ kết quả của lựa chọn, không chờ việc thấy sự kiện.
 - Git Bash đổi `/bok/play` thành đường dẫn Windows: thêm `MSYS_NO_PATHCONV=1` khi chạy build, nếu không build dừng ở kiểm tra `--base`.
 - **Ngôn ngữ trên site tĩnh:** không có server đọc cookie `vkl_lang`, nên HTML luôn là tiếng Việt và client tự đổi chữ. Lỗi hydrate #418 trong console khi mở bằng tiếng Anh là chuyện đã biết. `lang.js` bỏ qua đúng lỗi này và báo mọi lỗi khác. Nút chọn ngôn ngữ là `.lang-seg button`, có `role="radio"`.

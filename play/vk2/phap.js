@@ -374,7 +374,9 @@
     }
     const time = lawTier(p, "thoi_gian");
     if (time > (p.timeApplied ?? 0)) {
-      c.lifespan = (c.lifespan ?? 0) + (time - (p.timeApplied ?? 0)) * 30;
+      const add = (time - (p.timeApplied ?? 0)) * 30;
+      c.lifespan = (c.lifespan ?? 0) + add;
+      c.lifeExtra = (c.lifeExtra ?? 0) + add; // Game kẹp thọ mỗi năm, chỉ phần trong lifeExtra mới còn lại
       p.timeApplied = time;
     }
     // Sinh Tử: cứu một lần, có thời gian hồi. Không cứu được cái chết do game phán quyết, chỉ giữ sức khỏe trước khi tới đó.

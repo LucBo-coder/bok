@@ -43,6 +43,17 @@
     { n: "Huyết Sát Môn", lean: "ta", concept: "ma_cong" },
     { n: "Vô Tướng Tự", lean: "chinh", concept: "phat_phap" },
   ];
+  /* Tông môn có sẵn trong cốt truyện của game gốc. Chúng phải có mặt trong thế giới và không bị diệt, vì sự kiện gốc vẫn nhắc tới. */
+  const GAME_SECTS = {
+    "Thanh Vân Tông": { lean: "chinh", concept: "kiem_y" },
+    "Kiếm Cốc": { lean: "chinh", concept: "kiem_y" },
+    "Phổ Đà Sơn": { lean: "chinh", concept: "phat_phap" },
+    "Thiên Cơ Các": { lean: "trung", concept: "tran_dao" },
+    "Huyết Sát Môn": { lean: "ta", concept: "ma_cong" },
+    "Vạn Độc Môn": { lean: "ta", concept: "dan_dao" },
+    "Yêu Thần Điện": { lean: "ta", concept: "yeu_huyet" },
+    "Hợp Hoan Tông": { lean: "ta", concept: "hon_thuat" },
+  };
   const SEED_FAMS = ["Tạ gia", "Mộ Dung gia", "Hứa gia"];
   const RANK_NEED = [0, 30, 90, 200]; // Cống hiến cho từng chức, theo sectRank của game
   const RANK_NAME = [["Đệ tử ký danh", "Named Disciple"], ["Ngoại môn", "Outer Disciple"], ["Nội môn", "Inner Disciple"], ["Chân truyền", "True Disciple"]];
@@ -73,8 +84,27 @@
   const pickOf = (list, x) => list[Math.floor(x * list.length) % list.length];
   const ageOf = (w, n) => w.year - n.b;
 
+  /** Chạy một lần cho mỗi thế giới, kể cả thế giới của save cũ. */
+  function addGameSects(w) {
+    if (w.gameSects) return w;
+    w.gameSects = 1;
+    for (const [name, def] of Object.entries(GAME_SECTS)) {
+      if (!w.sects[name]) {
+        if ((w.gone ?? []).some((g) => g.n === name)) continue;
+        w.sects[name] = newSect(w, name, def.lean, def.concept, 3);
+      }
+      w.sects[name].lean = def.lean;
+      w.sects[name].prot = true;
+    }
+    return w;
+  }
+  /** Phe của tông do mod tạo. Tông của game gốc để game tự quyết. */
+  const sectLean = (acct, name) => {
+    const s = acct?.world?.sects?.[name];
+    return s && !s.prot && !GAME_SECTS[name] ? s.lean ?? null : null;
+  };
   function world(acct, c) {
-    if (acct.world) return acct.world;
+    if (acct.world) return addGameSects(acct.world);
     const w = (acct.world = { v: 1, seed: hash32((c?.lookSeed ?? 7) + 991), year: 1000, life: c?.lifeNo ?? 0, nextId: 1, npcs: [], fallen: [], sects: {}, fams: {}, wars: [], log: [] });
     for (const s of SEED_SECTS) w.sects[s.n] = newSect(w, s.n, s.lean, s.concept, 2 + Math.floor(wr(w, 1, hash32(s.n)) * 3));
     for (const n of SEED_FAMS) w.fams[n] = { n, rep: 5 + Math.floor(wr(w, 2, hash32(n)) * 20), wealth: 500, land: 1, tech: null, blood: null, life: 0, at: w.year };
@@ -83,7 +113,7 @@
       if (i % 3 === 0) n.s = pickOf(SEED_SECTS, wr(w, 3, i)).n;
       if (i % 5 === 0) n.fam = pickOf(SEED_FAMS, wr(w, 4, i));
     }
-    return w;
+    return addGameSects(w);
   }
   function newSect(w, name, lean, concept, terr) {
     return { n: name, lean, concept, terr, vein: 1 + Math.floor(wr(w, 5, hash32(name)) * 3), store: 200, rel: {}, at: w.year, own: 0, prot: false };
@@ -92,7 +122,7 @@
   function sectOf(w, name) {
     if (!name) return null;
     if (!w.sects[name] && !(w.gone ?? []).some((g) => g.n === name)) {
-      const sec = newSect(w, name, "trung", "kiem_y", 3);
+      const sec = newSect(w, name, GAME_SECTS[name]?.lean ?? "trung", GAME_SECTS[name]?.concept ?? "kiem_y", 3);
       sec.prot = true;
       w.sects[name] = sec;
     }
@@ -1003,7 +1033,7 @@
 
   const api = {
     kind: "the", QUESTS, NPC_CAP, NPC_MIN, REALM_MAX, LIFESPAN, PERSONAS, TALENTS, GOALS, PATH_NAME, PATH_CONCEPT, RANK_NEED, RANK_NAME, OWN_SECT, OWN_FAM, SECT_SHOP, LEARN_GAP, TEACH_GAP, TASK_YEARS, FF_MIN, REALM_N,
-    ensure, world, metric, fx, refresh, onYear, nextEvent, eventDef, onDeath, summary, step, famStep, fastForward, addNpc, npcOf, ageOf, sectOf, sectPower, headOf, npcPower,
+    ensure, world, sectLean, metric, fx, refresh, onYear, nextEvent, eventDef, onDeath, summary, step, famStep, fastForward, addNpc, npcOf, ageOf, sectOf, sectPower, headOf, npcPower,
     masterCandidates, giftCost, canApprentice, apprentice, leaveMaster, canLearn, learnFromMaster, myMaster, myDisciples,
     discSlots, discCandidates, canTakeDisciple, takeDisciple, teach, supportCost, support, sendTask,
     mySect, joinWorldSect, donate, canRankUp, rankUp, exchange, canFoundSect, foundSect, invest, investCost,

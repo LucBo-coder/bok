@@ -344,3 +344,74 @@ test("mọi thiên phú có đủ 5 bậc hiệu ứng, và mọi nhiệm vụ c
   }
   for (const q of [...D.MAIN, ...D.REALM, ...D.LIFE, ...D.DAILY_POOL]) assert.ok(q.goal[1] > 0, q.id);
 });
+
+// ---------- Cơ chế trận trong trận thời gian thực ----------
+
+function fightWith(mods, over = {}) {
+  const f = { pHp: 500, pMax: 1000, mHp: 900, ps: { atk: 200 }, last: [{ side: "p", dmg: 100 }], ...over };
+  f.vk2 = { first: 0, extra: 0, leech: 0, dodge: 0, pierce: 0, shield: 0, burn: 0, pool: 0, opened: false, bonus: 0, ...mods };
+  return f;
+}
+
+test("trận thật: xuyên giáp giảm phòng thủ, không sửa object gốc của quái", () => {
+  const foe = { def: 100 };
+  const f = fightWith({ pierce: 0.5 });
+  assert.equal(C.fightFoe({}, f, foe).def, 50);
+  assert.equal(foe.def, 100);
+  assert.equal(C.fightFoe({}, fightWith({}), foe), foe);
+});
+
+test("trận thật: đánh trước chỉ một lần đầu trận, đánh thêm theo tỷ lệ", () => {
+  const f = fightWith({ first: 1, extra: 0 });
+  assert.equal(C.fightExtra(f, () => 0), 1);
+  assert.equal(C.fightExtra(f, () => 0), 0);
+  assert.equal(C.fightExtra(fightWith({ extra: 0.5 }), () => 0.9), 0);
+  assert.equal(C.fightExtra(fightWith({ extra: 0.5 }), () => 0.1), 1);
+  assert.equal(C.fightExtra({}), 0, "trận chưa có trạng thái thì không có đòn phụ");
+});
+
+test("trận thật: thiêu đốt và hút máu theo sát thương vừa gây, đòn trượt thì không có", () => {
+  const f = fightWith({ burn: 0.1, leech: 0.5 });
+  C.fightHit(f, 1000);
+  assert.equal(f.mHp, 880);
+  assert.equal(f.last[0].dmg, 120);
+  assert.equal(f.pHp, 550);
+  assert.match(f.last[0].tag, /Thiêu 20/);
+  assert.match(f.last[0].tag, /Hút \+50/);
+  const miss = fightWith({ burn: 0.1, leech: 0.5 });
+  C.fightHit(miss, 900);
+  assert.equal(miss.mHp, 900);
+  assert.equal(miss.pHp, 500);
+});
+
+test("trận thật: hút máu không vượt máu tối đa, thiêu không làm máu quái âm", () => {
+  const f = fightWith({ burn: 10, leech: 1 }, { pHp: 990, mHp: 5 });
+  C.fightHit(f, 500);
+  assert.equal(f.pHp, 1000);
+  assert.equal(f.mHp, 0);
+});
+
+test("trận thật: né trả lại toàn bộ đòn, hộ thể đỡ đến hết rồi mới trừ máu", () => {
+  const dodge = fightWith({ dodge: 0.5 }, { pHp: 400, last: [{ side: "m", dmg: 100, crit: true, tag: "x" }] });
+  C.fightGuard(dodge, 500, () => 0.1);
+  assert.equal(dodge.pHp, 500);
+  assert.equal(dodge.last[0].dmg, 0);
+  assert.match(dodge.last[0].text, /Né/);
+  assert.equal(dodge.last[0].crit, false);
+
+  const sh = fightWith({ pool: 30 }, { pHp: 400, last: [{ side: "m", dmg: 100 }] });
+  C.fightGuard(sh, 500, () => 0.9);
+  assert.equal(sh.pHp, 430);
+  assert.equal(sh.vk2.pool, 0);
+  assert.equal(sh.last[0].dmg, 70);
+  sh.pHp = 300;
+  C.fightGuard(sh, 430, () => 0.9);
+  assert.equal(sh.pHp, 300, "hộ thể đã hết thì không đỡ nữa");
+});
+
+test("trận thật: quái không trúng thì không tiêu hộ thể, cũng không tính né", () => {
+  const f = fightWith({ pool: 30, dodge: 1 }, { last: [{ side: "m", dmg: 0, text: "Trượt!" }] });
+  C.fightGuard(f, 500, () => 0);
+  assert.equal(f.vk2.pool, 30);
+  assert.equal(f.last[0].text, "Trượt!");
+});

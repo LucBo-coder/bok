@@ -26,10 +26,25 @@ PATCHES = {
             "let tk=nq.current,",
             f"{HOOK}&&{HOOK}.bind({{charRef:nq,metaRef:F,setMeta:E,saveMeta:e=>(0,X.m)(nA.current,e).catch(()=>{{}}),"
             "rerender:nG,save:nV,openPanel:eq,mutate:tl,setRunning:eF,running:eE,user:j,game:O,"
-            "pendingRef:nE});let tk=nq.current,",
+            "pendingRef:nE,panel:eZ});let tk=nq.current,",
+        ),
+        # Hai hàm đòn duy nhất của game, dùng cho săn quái, phục kích và đấu tay đôi. Bọc lại để cơ chế trận của mod đi vào trận thật.
+        (
+            "function n7(e,n,t,a,i){if(n.fsP??",
+            f"function n7(e,n,t,a,i){{var h={HOOK};if(!h)return __n7(e,n,t,a,i);var f=h.fightFoe(e,n,t),m=n.mHp;__n7(e,n,f,a,i);"
+            "for(var x=h.fightExtra(n);x>0&&n.mHp>0;x--)__n7(e,n,f,a,i);h.fightHit(n,m)}function __n7(e,n,t,a,i){if(n.fsP??",
+        ),
+        (
+            "function n8(e,n,t){if(e.fsP??",
+            f"function n8(e,n,t){{var h={HOOK},p=e.pHp;__n8(e,n,t);h&&h.fightGuard(e,p)}}function __n8(e,n,t){{if(e.fsP??",
         ),
     ],
     "0pcagq3015zh_.js": [
+        # Phe của tông môn: game chỉ biết tông của mình, tông khác mặc định là chính phái. Mod trả phe thật của tông do mod tạo.
+        (
+            '$=n=>n.sect?T.includes(n.sect)?"ta":M.includes(n.sect)?"trung":"chinh":null',
+            f'$=n=>n.sect?({HOOK}&&{HOOK}.sectLean(n.sect))||(T.includes(n.sect)?"ta":M.includes(n.sect)?"trung":"chinh"):null',
+        ),
         # Một năm của game: căn cơ được xử lý đúng một lần mỗi năm, kể cả trong bế quan
         # Bản gốc đổi tên thành nP0. Năm không có kỳ ngộ của game thì mod được phép đưa sự kiện của mình vào.
         (

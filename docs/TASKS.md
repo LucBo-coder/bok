@@ -74,7 +74,7 @@ Master prompt 3.0 (09/11/2026) thay cho các mục GĐ3–GĐ6 cũ, và có các
 | 10 | Luyện khí, phù lục, bản mệnh | Có Lò rèn (`forge`, `forgeMap`); "bản mệnh" chỉ là hệ ngũ hành; không có phù lục | Đọc một phần | 3 | **Xong**, trừ cơ chế trận trong trận thời gian thực (chỉ nhận chỉ số) |
 | 11 | Động phủ | Bế quan có thật, động phủ chỉ là văn bản | Đọc một phần | 3 | **Xong** |
 | 12 | Tâm ma, chấp niệm | Chỉ số tâm ma và sự kiện `tam_ma`; chưa dựa trên lịch sử nhân vật | Đọc một phần | 5 | **Xong** |
-| 13 | Pháp tắc, Đại Đạo | Không có | Từ khóa | 5 | **Xong**, trừ cơ chế trận trong trận thời gian thực |
+| 13 | Pháp tắc, Đại Đạo | Không có | Từ khóa | 5 | **Xong** |
 | 14 | NPC tự phát triển | Oan gia và kẻ thù có tên, không có mô phỏng theo năm | Đọc một phần | 4 | **Xong**; 34–60 NPC mô phỏng theo năm |
 | 15 | Đại sự kiện thế giới | Thiên tượng hằng ngày, Tiên Ma đại chiến dạng sự kiện | Từ khóa | 5 | **Xong** |
 | 16 | Thiên Đạo ghi nhớ | Kiếp Số, nghiệp lực, sự kiện "Thiên đạo chú ý" | Đọc một phần | 6 | **Xong** |
@@ -111,7 +111,7 @@ Code: `vk2/dao.js`, `khi.js`, `the.js`, `phap.js`, `menh.js`, giao diện ở `v
 - [x] Không thêm tab trên màn hình chính: mọi thứ nằm trong các nhóm của bảng Hành trình
 - [x] Mô tả trên trang chủ và mục "Cách chơi" được đổi lúc build (`TEXT_EDITS`)
 - [ ] Cân bằng bằng chơi thật: thông số mới được chỉnh theo mô phỏng
-- [ ] Trận thời gian thực nhận chỉ số nhưng không nhận cơ chế trận (đánh thêm, hút máu, né) của pháp bảo, phù, pháp tắc
+- [x] Trận thời gian thực nhận cơ chế trận (đánh trước, đánh thêm, hút máu, né, xuyên giáp, hộ thể, thiêu đốt) của pháp bảo, phù, bí thuật, pháp tắc
 - [x] Sửa lỗi trang tải lại liên tục khi chọn tiếng Anh, có test `lang.js`
 - [ ] Cân bằng theo mô phỏng chưa đạt: Cân bằng, Ổn định tới Hóa Thần gần gấp đôi đối chứng, Tà đạo tụt mạnh (số liệu ở TEST_REPORT)
 - [ ] Chưa thử: văn bản sự kiện 3.0 bằng tiếng Anh, điện thoại thật, Safari, và bản 3.0 đầy đủ trên trang Pages thật
@@ -128,6 +128,20 @@ Nếu sau này muốn phát hành online: cần nối lại repo gốc (mod dự
 - [x] GĐ1 Event Engine, GĐ2 Chuỗi, GĐ3 NPC và thế giới, GĐ4 Nhân quả và luân hồi, GĐ5 Nội dung, GĐ6 Giao diện và kiểm thử.
 - [x] 132 sự kiện đơn, 30 giai đoạn có lựa chọn, 22 chuỗi, 50 kết cục, 3 mạch đời NPC.
 - [ ] Cân bằng Tà đạo vẫn thấp hơn đối chứng, chưa xử lý.
+
+## Đồng bộ mod với game gốc (09/11/2026)
+
+Trước đợt này, một số hệ thống hiện trên bảng của mod nhưng không tác động vào game. Đo trên game thật trước khi sửa: 451 đòn với mọi pháp tắc chiến đấu ở bậc cao nhất mà không có lần né, hút máu hay đánh thêm nào; cấp 40 năm thọ thì sau 5 năm mất hết.
+
+- [x] Cơ chế trận đi vào trận thật, qua bản vá hai hàm đòn `n7`, `n8` (săn quái, phục kích, đấu tay đôi)
+- [x] Trần cơ chế trận hạ xuống vì nay áp dụng cho mọi trận
+- [x] Thọ từ pháp tắc Thời Gian và sự kiện ghi vào `lifeExtra`, không còn bị game kẹp mất
+- [x] 8 tông môn của game có trong thế giới của mod, đúng phe, không bị diệt; save cũ được bổ sung một lần
+- [x] Tông do mod tạo có phe thật trong game (danh xưng, thí luyện), không còn mặc định chính phái
+- [x] Hộ Thân Phù có tác dụng khi đột phá hỏng; lên tầng không còn làm mất phù đột phá
+- [x] Bảng Trừ yêu, Thông tin, Tàng Kinh Các, Túi đồ, Bế quan, Linh thú của game có mục nối sang hệ thống của mod
+- [ ] Trận thật chưa làm hao mòn pháp bảo; chỉ bí cảnh mới hao mòn
+- [ ] Cân bằng sau thay đổi này mới đo bằng mô phỏng công thức trận, chưa có người chơi thật
 
 ## Lớp đồ họa
 - [x] Trời theo giờ, thiên tượng, hạt theo trọng tâm, hào quang theo cảnh giới, hiệu ứng đột phá, khung sự kiện theo độ hiếm, tab Đồ Họa.

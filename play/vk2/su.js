@@ -448,6 +448,7 @@
     }
     if (fx.life) {
       c.lifespan = (c.lifespan ?? 0) + fx.life;
+      c.lifeExtra = (c.lifeExtra ?? 0) + fx.life; // Game kẹp thọ mỗi năm, chỉ phần trong lifeExtra mới còn lại
       seen.push(`${tr(["Thọ nguyên", "Lifespan"])} ${sign(fx.life)}`);
     }
     for (const [k, n] of Object.entries(fx.wound ?? {})) root.VK2Phap?.wound?.(c, acct, k, n);

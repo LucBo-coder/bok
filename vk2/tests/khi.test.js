@@ -343,3 +343,60 @@ test("lưu qua JSON giữ nguyên trạng thái động phủ và pháp bảo", 
   assert.deepEqual(Q.summary(copy), Q.summary(c));
   assert.ok(Math.abs(C.cultMul(copy) - C.cultMul(c)) < 1e-9);
 });
+
+// ---------- Hộ Thân Phù và trận thật ----------
+
+function armedChar(id, over = {}) {
+  const [c, a] = mk({ realm: 3, layer: 2, cultivation: 600, ...over });
+  c.vk2.khi.talismans[id] = 1;
+  assert.ok(Q.arm(c, a, id));
+  return { a, c, k: c.vk2.khi };
+}
+
+test("Hộ Thân Phù: đột phá hỏng được trả lại nửa phần tu vi đã mất", () => {
+  const { c, k } = armedChar("ho_than");
+  c.breakFail = { r: 3, n: 1 };
+  const notes = Q.tick(c);
+  assert.equal(k.armed, null);
+  assert.equal(c.cultivation, 800, "từ 600 (sau khi mất 40% của 1000) về 800");
+  assert.equal(notes.length, 1);
+});
+
+test("Hộ Thân Phù: đột phá thành công thì mất phù nhưng không cộng gì, lên tầng thì chưa mất", () => {
+  const { c, k } = armedChar("ho_than");
+  c.layer = 3;
+  Q.tick(c);
+  assert.equal(k.armed, "ho_than", "lên tầng không phải đột phá");
+  c.realm = 4;
+  const notes = Q.tick(c);
+  assert.equal(k.armed, null);
+  assert.equal(c.cultivation, 600);
+  assert.equal(notes.length, 0);
+});
+
+test("Tĩnh Tâm Phù không bị mất khi chỉ lên tầng", () => {
+  const { c, k } = armedChar("tinh_tam");
+  c.layer = 3;
+  Q.tick(c);
+  assert.equal(k.armed, "tinh_tam");
+});
+
+test("phù từ save cũ không bị mất oan và không được trả tu vi oan", () => {
+  const { c, k } = armedChar("ho_than");
+  k.armedSeen = "3:2:";
+  c.breakFail = { r: 3, n: 1 };
+  assert.deepEqual(Q.tick(c), []);
+  assert.equal(k.armed, "ho_than");
+  assert.equal(c.cultivation, 600);
+});
+
+test("lá phù chiến đấu tiêu hao khi trận thật bắt đầu, và vẫn cộng vào trận đó", () => {
+  const { c, k } = armedChar("hoa_cau");
+  const f = { pMax: 1000 };
+  C.fightFoe(c, f, { def: 10 });
+  assert.equal(k.armed, null);
+  assert.ok(f.vk2.burn >= 0.12);
+  const next = { pMax: 1000 };
+  C.fightFoe(c, next, { def: 10 });
+  assert.ok(next.vk2.burn < 0.12, "trận sau không còn");
+});

@@ -23,7 +23,7 @@ Nguyên tắc chung: mọi hệ thống dùng lại sự kiện, chỉ số và 
 - 5 loại phù: Hộ Thân và Liệt Hỏa dùng trong trận, Độn Thổ và Phá Cấm dùng trong bí cảnh, Tĩnh Tâm dùng cho đột phá.
 - 3 loại đất và 7 công trình, mỗi công trình 3 cấp, cấp bị giới hạn theo cảnh giới, phí năm tự trừ. Thiếu phí thì không có thu hoạch, 5 năm liền thì xuống cấp. Có sự kiện bị dòm ngó.
 
-Trận thời gian thực của game gốc (săn quái) chỉ nhận chỉ số, không nhận cơ chế trận (đánh thêm, hút máu, né...). Các cơ chế này chỉ có tác dụng trong trận tự động của bí cảnh và sự kiện 3.0.
+Trận thời gian thực của game gốc (săn quái, phục kích, đấu tay đôi) nhận cả chỉ số lẫn cơ chế trận (đánh thêm, hút máu, né...), giống trận tự động của bí cảnh và sự kiện. Mỗi trận dùng lại trần chung trong `duelMods`.
 
 ## Thế giới sống (`the.js`, `acct.world`)
 

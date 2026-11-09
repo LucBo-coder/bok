@@ -42,7 +42,7 @@
   // ---------- Phù lục ----------
 
   const TALISMANS = {
-    ho_than: { n: ["Hộ Thân Phù", "Guardian Talisman"], d: ["Lần đột phá hoặc trận bí cảnh kế tiếp có thêm hộ thể.", "A shield for your next breakthrough or realm fight."], need: { thuy_ngoc: 1, linh_thao: 1 }, stones: 40, realm: 1, use: ["chiến đấu", "combat"] },
+    ho_than: { n: ["Hộ Thân Phù", "Guardian Talisman"], d: ["Trận kế tiếp có hộ thể. Nếu đột phá trước trận: hỏng thì giữ được một nửa phần tu vi sẽ mất và không nội thương.", "A shield for your next fight. If you attempt a breakthrough first: on failure you keep half the lost cultivation and take no inner wound."], need: { thuy_ngoc: 1, linh_thao: 1 }, stones: 40, realm: 1, use: ["chiến đấu", "combat"] },
     hoa_cau: { n: ["Liệt Hỏa Phù", "Blazing Talisman"], d: ["Trận kế tiếp thiêu địch theo công của bạn.", "Your next fight burns the enemy, based on your attack."], need: { hoa_tinh: 1, linh_thao: 1 }, stones: 40, realm: 1, use: ["chiến đấu", "combat"] },
     don_tho: { n: ["Độn Thổ Phù", "Escape Talisman"], d: ["Rút khỏi bí cảnh tức thì, không bị thương.", "Leave a secret realm instantly, unharmed."], need: { tho_nguyen: 1 }, stones: 60, realm: 1, use: ["bí cảnh", "secret realm"] },
     pha_cam: { n: ["Phá Cấm Phù", "Seal-breaking Talisman"], d: ["Phá chắc chắn một bẫy hoặc cấm chế trong bí cảnh.", "Surely breaks one trap or seal in a realm."], need: { kim_thiet: 1, thuy_ngoc: 1 }, stones: 80, realm: 2, use: ["bí cảnh", "secret realm"] },
@@ -309,7 +309,8 @@
     if (id === "tinh_tam") addStat(c, "tamMa", -6);
     return true;
   }
-  const breakKey = (c) => `${c.realm ?? 0}:${c.layer ?? 0}:${c.breakFail ? `${c.breakFail.r}:${c.breakFail.n}` : ""}`;
+  // Lên tầng trong cùng cảnh giới không phải đột phá, nên không tính vào đây. Dấu | phân biệt với khóa của save cũ.
+  const breakKey = (c) => `${c.realm ?? 0}|${c.breakFail ? `${c.breakFail.r}:${c.breakFail.n}` : ""}`;
 
   // ---------- Động phủ ----------
 
@@ -541,11 +542,19 @@
     const k = c.vk2?.khi;
     if (!k?.armed) return [];
     const key = breakKey(c);
-    if (k.armedSeen !== key && (k.armed === "tinh_tam" || k.armed === "ho_than")) {
-      k.armed = null;
-      k.armedAge = 0;
-    }
-    return [];
+    if (k.armed !== "tinh_tam" && k.armed !== "ho_than") return [];
+    if (!String(k.armedSeen).includes("|")) k.armedSeen = key; // Lá phù từ save cũ: giữ lại, tính từ bây giờ
+    if (k.armedSeen === key) return [];
+    const was = k.armed;
+    const sameRealm = k.armedSeen.split("|")[0] === key.split("|")[0];
+    k.armed = null;
+    k.armedAge = 0;
+    if (was !== "ho_than" || !sameRealm || !c.breakFail) return [];
+    // Game vừa lấy đi 40% tu vi và căn cơ vừa ghi nội thương. Lá phù trả lại nửa phần tu vi và xóa vết nội thương đó.
+    c.cultivation = Math.round((c.cultivation ?? 0) / 0.6 * 0.8);
+    const can = c.vk2.can;
+    if (can) can.injury = Math.max(0, can.injury - 6 * (root.VK2Can?.bodyOf?.(c)?.mech?.injuryMul ?? 1));
+    return [{ kind: "good", t: ["Hộ Thân Phù vỡ tan, đỡ cho bạn một nửa hậu quả của lần đột phá hỏng.", "The Guardian Talisman shatters, taking half the cost of your failed breakthrough."] }];
   }
 
   /** Dùng trận chính thức của bí cảnh: lá phù chiến đấu đã chuẩn bị bị tiêu hao sau trận. */
@@ -556,6 +565,7 @@
       k.armedAge = 0;
     }
   }
+  const onFightStart = afterFight;
   function damageWorn(c, n) {
     const k = c.vk2?.khi;
     if (!k?.worn.length) return;
@@ -574,7 +584,7 @@
 
   const api = {
     kind: "khi", QUESTS, MATS, KINDS, QUAL, TALISMANS, SITES, BUILDINGS, ENHANCE_MAX, SPIRIT_LV, NATAL_REALM, HELD_MAX, BUILD_MAX, MAT_CAP, TALISMAN_CAP, NEGLECT_YEARS,
-    ensure, metric, fx, duel, onYear, tick, nextEvent, eventDef, onBump, addMat, hasMats, craftScore, canCraft, craft, wornSlots, itemOf, itemPower, toggleWorn, enhanceCost, enhance, repair, bindNatal,
+    ensure, metric, fx, duel, onFightStart, onYear, tick, nextEvent, eventDef, onBump, addMat, hasMats, craftScore, canCraft, craft, wornSlots, itemOf, itemPower, toggleWorn, enhanceCost, enhance, repair, bindNatal,
     canDraw, draw, hasTalisman, useTalisman, arm, canFound, found, build, buildLv, buildCost, upkeep, storeArt, matPrice, buyMat, afterFight, damageWorn, summary, raidDef,
   };
   root.VK2Khi = api;

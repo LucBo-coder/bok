@@ -312,3 +312,16 @@ test("nhiệm vụ không phát thưởng trùng và lưu qua JSON", () => {
   const copy = JSON.parse(JSON.stringify(c));
   assert.deepEqual(P.summary(copy), P.summary(c));
 });
+
+test("thọ từ pháp tắc Thời Gian được ghi vào trường game giữ qua lần kẹp hằng năm", () => {
+  const [c, a] = mk({ realm: 5, age: 100, lifespan: 300 });
+  const p = P.ensure(c, a);
+  p.laws.thoi_gian = 110;
+  c.age = 101;
+  P.onYear(c, a);
+  assert.equal(c.lifespan, 330);
+  assert.equal(c.lifeExtra, 30);
+  c.age = 102;
+  P.onYear(c, a);
+  assert.equal(c.lifeExtra, 30, "không cộng lại lần hai");
+});

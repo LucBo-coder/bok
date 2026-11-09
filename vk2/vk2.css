@@ -151,3 +151,9 @@
 .vk2-tier-2 { color: #2f5f9e; }
 .vk2-tier-3 { color: #8a4bb0; }
 .vk2-tier-4 { color: #b5651d; }
+
+/* Mục nối trong bảng của game gốc */
+.vk2-native { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; padding: 6px 8px; border: 1px dashed var(--muted); font-size: 13px; line-height: 1.35; }
+.vk2-native p { flex: 1; min-width: 0; margin: 0; overflow-wrap: anywhere; }
+.vk2-native .vk2-btn { flex: none; }
+@media (max-width: 480px) { .vk2-native { flex-wrap: wrap; } .vk2-native p { flex-basis: 100%; } }

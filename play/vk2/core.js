@@ -60,11 +60,14 @@
     for (const m of active()) {
       for (const [k, x] of Object.entries(m.duel?.(c) ?? {})) out[k] = (out[k] ?? 0) + x;
     }
-    out.extra = Math.min(out.extra, 0.6);
-    out.leech = Math.min(out.leech, 0.4);
-    out.dodge = Math.min(out.dodge, 0.35);
-    out.pierce = Math.min(out.pierce, 0.7);
-    out.shield = Math.min(out.shield, 0.5);
+    // Các cơ chế này áp dụng cho mọi trận, kể cả trận thời gian thực, nên trần phải đủ thấp để quái cao hơn nhiều cấp vẫn còn nguy hiểm.
+    out.extra = Math.min(out.extra, 0.3);
+    out.leech = Math.min(out.leech, 0.2);
+    out.dodge = Math.min(out.dodge, 0.2);
+    out.pierce = Math.min(out.pierce, 0.4);
+    out.shield = Math.min(out.shield, 0.25);
+    out.burn = Math.min(out.burn, 0.15);
+    out.first = Math.min(out.first, 0.5);
     return out;
   }
   /**
@@ -105,7 +108,81 @@
         hp -= d;
       }
     }
+    for (const x of active()) x.onFightStart?.(c); // Lá phù chiến đấu đã chuẩn bị chỉ dùng cho một trận
     return { win: foe.hp <= 0 && hp > 0, hp: clamp(hp / me.hp, 0, 1), turns };
+  }
+
+  // Cùng cơ chế đó trong trận thời gian thực của game: bản vá gọi các hàm dưới đây quanh hai hàm đòn của game.
+  // Trạng thái nằm ở f.vk2 của trận, nên mỗi trận được tính lại và lá phù chỉ dùng cho một trận.
+  function fightOf(c, f) {
+    if (f.vk2) return f.vk2;
+    const m = duelMods(c);
+    f.vk2 = { ...m, pool: Math.round((f.pMax ?? 0) * m.shield), opened: false, bonus: 0 };
+    for (const x of active()) x.onFightStart?.(c);
+    return f.vk2;
+  }
+  const fightFoe = (c, f, foe) => {
+    const s = fightOf(c, f);
+    return s.pierce > 0 ? { ...foe, def: foe.def * (1 - s.pierce) } : foe;
+  };
+  /** Số đòn phụ của lượt này: đánh trước một lần đầu trận, đánh thêm theo tỷ lệ. */
+  function fightExtra(f, r = Math.random) {
+    const s = f.vk2;
+    if (!s) return 0;
+    let n = 0;
+    if (!s.opened) {
+      s.opened = true;
+      if (s.first > 0 && r() < s.first) n++;
+    }
+    if (s.extra > 0 && r() < s.extra) n++;
+    s.bonus = n;
+    return n;
+  }
+  const addFightTag = (entry, text) => {
+    if (entry) entry.tag = [entry.tag, text].filter(Boolean).join(" ");
+  };
+  /** Sau lượt đánh của người chơi: thiêu đốt và hút máu theo sát thương vừa gây ra. */
+  function fightHit(f, foeHpBefore) {
+    const s = f.vk2;
+    const last = f.last?.[f.last.length - 1];
+    if (!s || !last) return;
+    if (s.bonus) addFightTag(last, tr(["Đánh thêm", "Extra strike"]));
+    s.bonus = 0;
+    const dealt = Math.max(0, foeHpBefore - f.mHp);
+    if (dealt <= 0) return;
+    if (s.burn > 0) {
+      const b = Math.max(1, Math.round(f.ps.atk * s.burn));
+      f.mHp = Math.max(0, f.mHp - b);
+      last.dmg = (last.dmg ?? 0) + b;
+      addFightTag(last, `${tr(["Thiêu", "Burn"])} ${b}`);
+    }
+    if (s.leech > 0 && f.pHp < f.pMax) {
+      const h = Math.min(f.pMax - f.pHp, Math.round(dealt * s.leech));
+      if (h > 0) {
+        f.pHp += h;
+        addFightTag(last, `${tr(["Hút", "Drain"])} +${h}`);
+      }
+    }
+  }
+  /** Sau đòn của quái: né thì trả lại toàn bộ, không thì hộ thể đỡ trước khi trừ vào máu. */
+  function fightGuard(f, hpBefore, r = Math.random) {
+    const s = f.vk2;
+    const lost = hpBefore - f.pHp;
+    const last = f.last?.[f.last.length - 1];
+    if (!s || !last || lost <= 0) return;
+    if (s.dodge > 0 && r() < s.dodge) {
+      f.pHp = hpBefore;
+      Object.assign(last, { dmg: 0, crit: false, fx: undefined, tag: undefined, text: tr(["Né!", "Dodged!"]) });
+      return;
+    }
+    if (s.pool > 0) {
+      const a = Math.min(s.pool, lost);
+      s.pool -= a;
+      f.pHp += a;
+      last.dmg = Math.max(0, (last.dmg ?? 0) - a);
+      addFightTag(last, `${tr(["Hộ thể", "Shield"])} ${a}`);
+      if (last.dmg === 0) last.text = tr(["Đỡ được!", "Blocked!"]);
+    }
   }
 
   /** Sự kiện năm của module. Mỗi lần chỉ một sự kiện, và cách nhau đủ xa để không lấn kỳ ngộ gốc. */
@@ -640,7 +717,7 @@
     newAcct, normAcct, ensure, rootInfo, metric, bump, onKill, tick, listQuests, tracked, claim, togglePin,
     checkAwaken, canAwaken, setActive, canLevelUp, needsBranch, levelUp, chooseBranch, talentFx, talentThreshold,
     journey, logEntries, totals, softcap, cultMul, breakBonus, statMul, prepBonus, dayKey, ensureDaily, talentDef,
-    MOD_CAP, register, mods, setModsOff, onYear, yearEvent, chainEvent, eventDef, captureCombat, combatLevel, combatStats, duelMods, duel,
+    MOD_CAP, register, mods, setModsOff, onYear, yearEvent, chainEvent, eventDef, captureCombat, combatLevel, combatStats, duelMods, duel, fightFoe, fightExtra, fightHit, fightGuard,
     kit: { clamp, hash32, rnd, yearOf, tr, addStat },
   };
 })(typeof globalThis !== "undefined" ? globalThis : this);

@@ -147,7 +147,7 @@ Số trong ngoặc là đối chứng. Chênh dưới khoảng 10 điểm ở 10
 
 - **Trang Pages thật:** bản 3.0 đầy đủ chưa được chạy trên github.io vì chưa commit.
 - **Người chơi thật:** chưa ai chơi các hệ thống này. Mọi số cân bằng đến từ bot.
-- **Trận thời gian thực:** chỉ nhận chỉ số, không nhận cơ chế của pháp bảo, phù, pháp tắc.
+- **Trận thời gian thực:** lúc đo mục này, trận chỉ nhận chỉ số. Đã sửa, xem mục "Đồng bộ mod với game gốc".
 - **Tiếng Anh:** mới kiểm tra đổi ngôn ngữ, vào game, thời gian trôi, tải lại và các tab ở nhân vật mới. Chưa kiểm tra văn bản sự kiện 3.0 và các tab khi đã có đủ dữ liệu bằng tiếng Anh.
 - **Điện thoại thật, Safari:** chưa thử.
 
@@ -289,3 +289,29 @@ Giới hạn đã biết:
 Chạy trên https://lucbo-coder.github.io/bok/play/choi/ bằng Edge headless giả lập điện thoại: `pages.js` 21/21, `mobile.js` 38/38, `restart.js` 7/7. Link gốc `/bok/` tự chuyển vào game.
 
 Chưa thử trên điện thoại thật và trên Safari. Mục "Máy chủ giả lập khác Pages thật" ở trên đã được kiểm chứng bằng các lượt chạy này.
+
+## Đồng bộ mod với game gốc (09/11/2026)
+
+Test mới `vk2/tests/sync.js` đo trên game thật, chạy trên bản local và đường dẫn `/bok/play`. Chạy trên bản chưa sửa trước để chắc test bắt được lỗi.
+
+| Kiểm tra | Trước khi sửa | Sau khi sửa |
+|---|---|---|
+| Cấp 40 năm thọ, sau 5 năm | 254 -> 254, mất hết | 179 -> 219, còn nguyên |
+| Cơ chế trận trong trận thật, mọi pháp tắc chiến đấu bậc cao nhất | 451 đòn, không có lần nào | Có né, hút máu, thiêu, đánh thêm, hộ thể |
+| Tông của game trong thế giới mod | 1/8 tông, và tông đó chưa được bảo vệ | 8/8, đúng phe |
+| Danh xưng khi ở tông trung lập của mod | Danh xưng chính phái | Danh xưng trung lập |
+| Mục nối trong 6 bảng của game | Không có | Có, nút mở đúng bảng |
+
+Tỷ lệ thắng theo mô phỏng công thức trận, 4000 trận mỗi ô, cấp quái so với nhân vật. Dòng "trần cũ" là lý do hạ trần:
+
+| Cơ chế | Cùng cấp | +2 | +4 | +6 | +8 |
+|---|---:|---:|---:|---:|---:|
+| Không có | 85% | 9% | 0% | 0% | 0% |
+| Một pháp bảo và phù hộ thân | 98% | 32% | 0% | 0% | 0% |
+| Giữa game: 2 pháp tắc bậc 2, 2 pháp bảo | 94% | 25% | 0% | 0% | 0% |
+| Chạm trần cũ | 100% | 100% | 100% | 88% | 31% |
+| Chạm trần mới | 100% | 99% | 65% | 7% | 0% |
+
+Giới hạn: đây là mô phỏng bằng chỉ số giả định, không có đòn công pháp của game. Pháp tắc trong `sync.js` được gán thẳng, không qua quá trình tu thật. Nhãn cơ chế dài có thể chồng lên nhau khi đánh ở tốc độ cao. Mô phỏng 1200 kiếp không gồm trận thời gian thực, nên chưa đo tác động của thay đổi này lên toàn bộ một đời chơi.
+
+Kết quả sau mọi sửa: logic 245/245; `sync` 36/36 trên `/bok/play` và 3 lần liền trên bản local; `gfx` 56/56, `mobile` 38/38, `lang` đạt, `v3_e2e` 66/66 trên cả hai; `e2e` 52/52 ba lần; `can_e2e` 41/41; `restart` 7/7; `pages` 21/21; `sim.js 100` 1200 kiếp, 0 vi phạm, 0 lỗi trang. Một lần chạy `sync` trước khi có cơ chế chơi lại đã hỏng 22 mục vì nhân vật chết do sự kiện ngẫu nhiên giữa chừng, không phải lỗi game.
