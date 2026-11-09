@@ -97,3 +97,12 @@ Pages đang ở chế độ deploy từ gốc nhánh `main`, nên bản dựng �
 - Game có thể ghi đè `className` của `.scene`, nên các lớp `vk2g-*` được đặt lại ở mỗi lượt đọc, không chỉ khi trạng thái đổi.
 - Màn đầu thai không nằm trong `.scene`. Canvas `.vk2g-page-birth` gắn vào `body` với `z-index: -1`, nên `body` phải trong suốt, nếu không nền của nó che canvas. Canvas màn chết nằm trong `.sheet-backdrop`, đứng trước `.sheet`.
 - Popup `position: fixed` có `offsetParent` là null. Khi test kiểm popup có đang mở không, phải dùng `getClientRects()`.
+
+## Tuyệt phẩm và linh thú mới (`vk2/gear.js`, `vk2/bao.js`)
+- `gear.js` chỉ có dữ liệu, không phụ thuộc gì, nạp ở `head_tags` trên mọi trang vì bản vá đọc nó khi khởi tạo bảng đồ và bảng dị thú. `bao.js` là logic, đăng ký qua `C.register`.
+- Đồ phẩm 4 có `src: "event"` và `price: 0`: bảng rơi của game chỉ lấy `src === "drop"`, cửa hàng loại `src === "event"`.
+- `fx` của đồ trong game đã là phần trăm (`atk: 88` là +88%), khác `fx` của mod. Đừng dùng `fxText` cho đồ của game.
+- Ô đồ của game chỉ vẽ ảnh `/icons/<id>.png` khi có `icon: true`; không có thì ô trống, trừ áo được vẽ từ `robe`. Ảnh đặt ở `vk2/icons/`, build chép vào `icons/`.
+- Thú dùng sheet gốc trong `site/lpc/beasts`, đổi màu bằng `filter`. Hệ của thú được game suy từ id, nên đặt id phải để ý các mẫu trong hàm `nt`.
+- id trong bảng đồ, bảng thú và bảng quái có thể đụng nhau: `kim_thiem` đã là quái của game, nên thú mới là `kim_tien_thiem`.
+- Game cũng có sự kiện thú với lời mời "Giao chiến thu phục"; test phải nhận sự kiện của mod theo tên thú.

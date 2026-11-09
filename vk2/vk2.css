@@ -157,3 +157,11 @@
 .vk2-native p { flex: 1; min-width: 0; margin: 0; overflow-wrap: anywhere; }
 .vk2-native .vk2-btn { flex: none; }
 @media (max-width: 480px) { .vk2-native { flex-wrap: wrap; } .vk2-native p { flex-basis: 100%; } }
+
+/* Phẩm Tuyệt phẩm: game gốc chỉ có màu tới .r3 */
+.r4 { --rc: #e0486a; }
+.rare-tag.r4 { background: #b02a5a; color: #fff4d0; }
+.inv-rare.r4 { color: #ff9ac0; text-shadow: 0 0 4px #e0486a; }
+.bk-cell.r4 { background: #ffe6ee; border-color: #b02a5a; }
+.find-toast.r4 { border-color: #e0486a; }
+.vk2-peer.on { border-color: #b02a5a; }

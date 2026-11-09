@@ -194,6 +194,48 @@
       ${stored ? `<ul class="vk2-near">${stored}</ul>` : `<p class="vk2-note">${T("Chưa có bí thuật nào để cất.", "No arts to store yet.")}</p>`}`;
   }
 
+  const Bao = globalThis.VK2Bao;
+  const Gear = globalThis.VK2Gear;
+  const SLOT_NAMES = { vu_khi: ["Vũ khí", "Weapon"], ao: ["Áo", "Robe"], phu_kien: ["Phụ kiện", "Accessory"] };
+  const PERK_NAMES = { pierce: ["Xuyên giáp", "Pierce"], shield: ["Hộ thể", "Shield"], dodge: ["Né đòn", "Dodge"] };
+  /** fx của đồ trong game đã là phần trăm (atk 88 là +88%), khác fx của mod nên không dùng fxText. */
+  const GEAR_FX = { atk: ["Công", "Attack"], def: ["Phòng", "Defence"], hp: ["Sinh lực", "HP"], crit: ["Bạo kích", "Crit"], cult: ["Tu luyện", "Cultivation"] };
+  const gearFx = (fx) => Object.entries(fx).map(([k, x]) => `${L(GEAR_FX[k])} +${x}%`).join(", ");
+  const perkText = (perk) => Object.entries(perk).map(([k, x]) => `${L(PERK_NAMES[k])} ${Math.round(x * 100)}%`).join(", ");
+  function peerlessHtml(c, a) {
+    const b = Bao.ensure(c, a);
+    const rows = Gear.ITEMS.map((it) => {
+      const check = Bao.canForge(c, a, it.id);
+      const owned = (c.inventory ?? []).includes(it.id);
+      const cost = Bao.COST[it.minRealm];
+      return `<div class="vk2-t vk2-peer ${owned ? "on" : check.ok ? "" : "locked"}"><div class="vk2-q-top"><b>${esc(it.name)}</b><span class="vk2-q-num">${esc(L(SLOT_NAMES[it.slot]))} · ${esc(realmName(it.minRealm))}</span></div>
+        <p>${esc(it.desc)}</p>
+        <small>${esc(gearFx(it.fx))}</small>
+        <small>${T("Thần thông", "Power")}: ${esc(perkText(it.perk))}</small>
+        ${owned ? `<small>${T("Đã có. Mặc hoặc tháo trong Túi đồ.", "Owned. Wear or remove it in your Inventory.")}</small>` : `<small>${cost.essence} ${T("tinh hoa", "essence")} · ${fmt(cost.stones)} ${T("linh thạch", "stones")} · ${check.mat ? `${T("sẽ dùng", "will use")} ${esc(check.mat.name)}` : T("cần một món Cực phẩm cùng loại chưa mặc", "needs an unworn Supreme item of this type")}</small>
+        ${check.ok ? "" : locked(reasonText(check.reasons))}
+        <div class="vk2-t-act"><button class="vk2-btn vk2-claim" data-act="bao-forge" data-id="${it.id}" ${check.ok ? "" : "disabled"}>${T("Đúc", "Forge")}</button></div>`}
+      </div>`;
+    }).join("");
+    const beasts = Object.keys(Gear.PET_RANK).map((id) => {
+      const rank = Gear.PET_RANK[id];
+      const mine = c.pet && c.petKind === id;
+      return `<div class="vk2-t ${mine ? "on" : ""}"><div class="vk2-q-top"><b>${esc(Gear.PETS[id].name)}</b><span class="vk2-q-num">${rank}</span></div><small>${mine ? T("Đang theo bạn", "With you now") : b.seen[id] !== undefined ? T("Đã gặp trong kiếp này", "Met in this life") : `${T("Có thể gặp từ", "Can appear from")} ${esc(realmName(Bao.BEAST[rank].realm))}`}</small></div>`;
+    }).join("");
+    return `${guide(T("Tuyệt phẩm là phẩm cao nhất, không rơi từ quái và không bán ở chợ. Muốn có phải đúc từ một món Cực phẩm cùng loại và Thiên Công Tinh Hoa.", "Peerless is the highest grade. It never drops and is never sold. You forge it from a Supreme item of the same type and Heavenly Essence."), T("Chỉ số cao hơn đồ Cực phẩm cùng mốc, và mỗi món có một thần thông dùng được trong mọi trận.", "Better stats than Supreme gear of the same tier, and a power that works in every fight."), T("Món Cực phẩm đem đúc sẽ mất. Đồ đang mặc không bị dùng.", "The Supreme item is consumed. Items you are wearing are never used."))}
+      <h3>${T("Thiên Công Tinh Hoa", "Heavenly Essence")} <small>${b.essence}/${Bao.ESSENCE_CAP}</small></h3>
+      <p class="vk2-note">${T(`Từ ${realmName(Bao.ESSENCE_REALM)}: đi hết một bí cảnh được ${Bao.CLEAR_GAIN} tinh hoa, diệt quái thỉnh thoảng rơi 1, và có thể gặp lão thợ rèn ẩn thế.`, `From ${realmName(Bao.ESSENCE_REALM)}: conquering a secret realm gives ${Bao.CLEAR_GAIN} essence, kills occasionally drop 1, and you may meet the hidden smith.`)}</p>
+      <h3>${T("Trang bị", "Gear")}</h3>
+      <div class="vk2-t-grid">${rows}</div>
+      <h3>${T("Linh thú mới", "New beasts")} <small>${T("thắng trận mới có cơ hội thu phục", "win the fight for a chance to tame")}</small></h3>
+      <div class="vk2-t-grid">${beasts}</div>`;
+  }
+  EXT.tabs.peerless = { n: ["Tuyệt Phẩm", "Peerless"], html: peerlessHtml };
+  EXT.actions["bao-forge"] = (c, a, b) => {
+    const it = Bao.forge(c, a, b.dataset.id);
+    if (it) toast(`${T("Đúc thành", "Forged")}: ${it.name}`, "awake");
+    commit(c);
+  };
   EXT.tabs.cave = { n: ["Động Phủ", "Abode"], html: caveHtml };
   EXT.tabs.forge = { n: ["Luyện Khí", "Forge"], html: forgeHtml };
   Object.assign(EXT.actions, {

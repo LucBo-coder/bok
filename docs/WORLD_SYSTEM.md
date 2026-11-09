@@ -55,3 +55,23 @@ Mỗi năm thế giới: NPC, tông môn, rồi `VK2Su.worldStep` tiến các ch
 Chuỗi đi tiếp theo điểm thế cuộc `s`, sức NPC tham gia và dấu của lựa chọn, kể cả khi người chơi vắng mặt. Kết cục đặt cờ thế giới, và cờ đó mở sự kiện hậu quả ở các kiếp sau. Tai họa làm giảm linh mạch chỉ tác động một tông, không bào mòn toàn thế giới.
 
 Mạch đời NPC: `phan_do` (bị trục xuất, vào ma đạo, thành trưởng lão, báo thù), `lap_tong` (tán tu lập tông), `an_si` (về ở ẩn, dạy một đứa trẻ).
+
+## Tuyệt phẩm và linh thú mới (`gear.js`, `bao.js`, `char.vk2.bao`)
+
+| Mốc | Tinh hoa | Linh thạch | Vũ khí | Áo | Phụ kiện |
+|---|---:|---:|---|---|---|
+| Nguyên Anh | 3 | 3.000 | Đoạn Nhạc Thần Phong, xuyên giáp 6% | Tử Vi Tinh Bào, hộ thể 5% | Thiên Cơ Ngọc Bội, né 3% |
+| Độ Kiếp | 4 | 12.000 | Phá Quân Tinh Hà, xuyên giáp 10% | Cửu Long Thiên Giáp, hộ thể 8% | Vạn Tượng Luân, né 5% |
+| Kim Tiên | 6 | 50.000 | Khai Thiên Trảm, xuyên giáp 14% | Hỗn Nguyên Đạo Y, hộ thể 12% | Chu Thiên Tinh Đồ, né 8% |
+
+Mỗi lần đúc tốn thêm một món Cực phẩm cùng loại chưa mặc, chưa khóa, ưu tiên món yếu nhất. Đúc không có tỷ lệ hỏng.
+
+Thiên Công Tinh Hoa, tối đa 12, chỉ có từ Nguyên Anh trở lên: đi hết một bí cảnh +2; diệt quái 1% mỗi lần, cách nhau ít nhất 5 năm; lão thợ rèn ẩn thế bán 1, gặp cách nhau ít nhất 30 năm. Tinh hoa thuộc về kiếp hiện tại.
+
+| Phẩm | Từ cảnh giới | Tỷ lệ mỗi năm, mỗi con | Thú |
+|---|---|---:|---|
+| SR | Trúc Cơ | 1,2% | Tam Túc Kim Thiềm, Thiết Giáp Ngưu, Thông Tý Linh Viên |
+| SSR | Nguyên Anh | 0,8% | Tỳ Hưu, Băng Tinh Phi Long, Huyền Ti Ma Chu |
+| SSS | Luyện Hư | 0,5% | Bạch Trạch, Bắc Minh Băng Kình |
+
+Mỗi con gặp tối đa một lần mỗi kiếp, hai lần gặp cách nhau ít nhất 15 năm. Thắng trận mới có cơ hội thu phục, theo đúng trận và tỷ lệ của game.

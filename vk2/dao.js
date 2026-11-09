@@ -376,7 +376,7 @@
       d.cleared += 1;
       C.bump(c, acct, "bc_clear_n", 1);
       text = tr([` Bạn đã đi hết ${tr(r.n)}.`, ` You have conquered the ${tr(r.n)}.`]);
-      for (const m of [root.VK2Phap, root.VK2Menh]) m?.onRealmCleared?.(c, acct, r);
+      for (const m of [root.VK2Phap, root.VK2Menh, root.VK2Bao]) m?.onRealmCleared?.(c, acct, r);
     }
     return `${text} ${tr(["Thu về", "Gained"])} ${stones} ${tr(["linh thạch", "stones"])}.`;
   }

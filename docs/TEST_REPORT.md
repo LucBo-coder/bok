@@ -315,3 +315,21 @@ Tỷ lệ thắng theo mô phỏng công thức trận, 4000 trận mỗi ô, c�
 Giới hạn: đây là mô phỏng bằng chỉ số giả định, không có đòn công pháp của game. Pháp tắc trong `sync.js` được gán thẳng, không qua quá trình tu thật. Nhãn cơ chế dài có thể chồng lên nhau khi đánh ở tốc độ cao. Mô phỏng 1200 kiếp không gồm trận thời gian thực, nên chưa đo tác động của thay đổi này lên toàn bộ một đời chơi.
 
 Kết quả sau mọi sửa: logic 245/245; `sync` 36/36 trên `/bok/play` và 3 lần liền trên bản local; `gfx` 56/56, `mobile` 38/38, `lang` đạt, `v3_e2e` 66/66 trên cả hai; `e2e` 52/52 ba lần; `can_e2e` 41/41; `restart` 7/7; `pages` 21/21; `sim.js 100` 1200 kiếp, 0 vi phạm, 0 lỗi trang. Một lần chạy `sync` trước khi có cơ chế chơi lại đã hỏng 22 mục vì nhân vật chết do sự kiện ngẫu nhiên giữa chừng, không phải lỗi game.
+
+## Tuyệt phẩm và linh thú mới (09/11/2026)
+
+Test mới: `vk2/tests/bao.test.js` (10 bài logic) và `vk2/tests/gear_e2e.js` (37 kiểm tra trên game thật, chạy ở bản local và đường dẫn `/bok/play`).
+
+| Kiểm tra trên game thật | Kết quả |
+|---|---|
+| Đồ trong bảng đồ thật | 9/9 trong 481 món |
+| Mặc đủ 3 món Kim Tiên, chỉ số Công trong Túi đồ | 2743 -> 6144 |
+| Nhãn, ảnh, dòng chỉ số, không có `undefined` | Đạt |
+| Đúc qua nút bấm: tốn đúng, tự mặc; nút khóa khi thiếu đồ | Đạt |
+| Né đòn của thần thông xuất hiện trong trận thật | Đạt, với né được nâng lên trần 20% trong lúc đo |
+| Sổ linh thú của game | Tổng 51 |
+| Sự kiện gặp thú, trận thật, thu phục | Đạt, với tỷ lệ gặp đặt thành 100% trong lúc đo |
+
+Lỗi test bắt được khi xem ảnh: dòng chỉ số bị nhân 100 và có `undefined`, ô vũ khí không có hình, id `kim_thiem` trùng quái của game. Đã sửa cả ba.
+
+Giới hạn: mô phỏng 1200 kiếp không có bot đúc đồ, nên chưa đo tốc độ kiếm tinh hoa và tác động cân bằng. Xuyên giáp và hộ thể của đồ mới được kiểm tra đi vào `duelMods`, chỉ né được đo bằng chữ trong trận. Ảnh thú đã xem nhưng chưa có người chơi đánh giá.

@@ -471,7 +471,7 @@
     { n: ["Nhiệm vụ", "Quests"], tabs: ["quests"] },
     { n: ["Tu luyện", "Practice"], tabs: ["can", "art", "talents", "root"] },
     { n: ["Cơ duyên", "Fortunes"], tabs: ["realm", "inherit"] },
-    { n: ["Sản nghiệp", "Estate"], tabs: ["cave", "forge"] },
+    { n: ["Sản nghiệp", "Estate"], tabs: ["cave", "forge", "peerless"] },
     { n: ["Nhân thế", "World"], tabs: ["mentor", "family", "sect", "people"] },
     { n: ["Thiên cơ", "Fate"], tabs: ["law", "heart", "crisis", "destiny", "karma"] },
   ];
@@ -546,8 +546,8 @@
       const k = c.vk2?.khi;
       const tali = Object.values(k?.talismans ?? {}).reduce((s, n) => s + n, 0);
       return {
-        text: `${T("Pháp bảo", "Treasures")}: ${k?.worn?.length ?? 0}/${k?.items?.length ?? 0} ${T("đang mang", "worn")} · ${T("Phù", "Talismans")}: ${tali}`,
-        tab: "forge", btn: T("Luyện khí", "Forging"),
+        text: `${T("Pháp bảo", "Treasures")}: ${k?.worn?.length ?? 0}/${k?.items?.length ?? 0} ${T("đang mang", "worn")} · ${T("Phù", "Talismans")}: ${tali} · ${T("Tinh hoa", "Essence")}: ${c.vk2?.bao?.essence ?? 0}`,
+        tab: "peerless", btn: T("Đúc Tuyệt phẩm", "Forge Peerless"),
       };
     },
     bequan: (c) => {

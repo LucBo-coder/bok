@@ -13,6 +13,7 @@ SRC = ROOT / "site"
 MOD = ROOT / "vk2"
 CHUNKS = "_next/static/immutable/chunks"
 HOOK = "globalThis.__VK2"
+GEAR = "globalThis.VK2Gear"  # Nạp trước bundle và có ở mọi trang, nên bảng đồ và bảng dị thú luôn đầy đủ
 
 PATCHES = {
     # Game gốc tải lại trang để server đọc cookie và trả HTML tiếng Anh. Site tĩnh luôn trả bản tiếng Việt
@@ -39,7 +40,36 @@ PATCHES = {
             f"function n8(e,n,t){{var h={HOOK},p=e.pHp;__n8(e,n,t);h&&h.fightGuard(e,p)}}function __n8(e,n,t){{if(e.fsP??",
         ),
     ],
+    "41koe_jam6mot.js": [
+        # Nhãn phẩm thứ 5 ở Túi đồ, Bảo khố và thẻ đồ
+        ('(0,i.Z)("Cực","Supr")],H=[', '(0,i.Z)("Cực","Supr"),(0,i.Z)("Tuyệt","Peer")],H=['),
+        ('(0,i.Z)("Cực phẩm","Supreme")],R={ao:', '(0,i.Z)("Cực phẩm","Supreme"),(0,i.Z)("Tuyệt phẩm","Peerless")],R={ao:'),
+        ('(0,D.Z)("Cực phẩm","Supreme")],U={ao:', '(0,D.Z)("Cực phẩm","Supreme"),(0,D.Z)("Tuyệt phẩm","Peerless")],U={ao:'),
+        ('(0,D.Z)("Cực phẩm","Supreme")];function en(', '(0,D.Z)("Cực phẩm","Supreme"),(0,D.Z)("Tuyệt phẩm","Peerless")];function en('),
+        ('(0,a.Z)("Cực phẩm","Supreme")],P=e=>', '(0,a.Z)("Cực phẩm","Supreme"),(0,a.Z)("Tuyệt phẩm","Peerless")],P=e=>'),
+    ],
     "0pcagq3015zh_.js": [
+        # Trang bị Tuyệt phẩm: thêm vào bảng đồ thật, nhãn và hệ số giá của phẩm thứ 5
+        ("...g,...m,...y],$={", f"...g,...m,...y,...({GEAR}?{GEAR}.ITEMS:[])],$={{"),
+        (
+            '(0,i.Z)("Cực phẩm","Supreme")],nH=new Set(x.t.filter(',
+            f'(0,i.Z)("Cực phẩm","Supreme"),(0,i.Z)("Tuyệt phẩm","Peerless")],nH=new Set(({GEAR}&&{GEAR}.capture(x.t),x.t).filter(',
+        ),
+        ('(0,d.Z)("Cực phẩm","Supreme")];function R(n,e,t,a,o)', '(0,d.Z)("Cực phẩm","Supreme"),(0,d.Z)("Tuyệt phẩm","Peerless")];function R(n,e,t,a,o)'),
+        ("[1,2,4,8][e.rare??0]", "[1,2,4,8,16][e.rare??0]"),
+        ("a=[1,2,4,10];function i(n){return n.price>0", "a=[1,2,4,10,20];function i(n){return n.price>0"),
+        # Linh thú mới: thêm vào bảng dị thú thật, nên có sổ, trận thu phục, tiến hóa và huyết mạch của game
+        ('Object.keys(t),n.s(["f",0,t])', f'{GEAR}&&Object.assign(t,{GEAR}.PETS),n.s(["f",0,t])'),
+        ('r=n=>o[n]??"R"', f'r=n=>({GEAR}&&{GEAR}.PET_RANK[n])||o[n]||"R"'),
+        ('c=n=>u[n]??"duong"', f'c=n=>({GEAR}&&{GEAR}.PET_KIND[n])||u[n]||"duong"'),
+        (
+            'N=["kim_si","tat_phuong","cuu_vi","con_bang","bach_ho","thanh_giao","cung_ky"]',
+            f'N=["kim_si","tat_phuong","cuu_vi","con_bang","bach_ho","thanh_giao","cung_ky",...({GEAR}?{GEAR}.NEW_SSR:[])]',
+        ),
+        (
+            'A=["thanh_long","ky_lan","huyen_vu","hoa_phuong"]',
+            f'A=["thanh_long","ky_lan","huyen_vu","hoa_phuong",...({GEAR}?{GEAR}.NEW_SSS:[])]',
+        ),
         # Phe của tông môn: game chỉ biết tông của mình, tông khác mặc định là chính phái. Mod trả phe thật của tông do mod tạo.
         (
             '$=n=>n.sect?T.includes(n.sect)?"ta":M.includes(n.sect)?"trung":"chinh":null',
@@ -123,7 +153,7 @@ def apply_text_edits(out):
 
 
 # Module gameplay của bản 3.0, nạp theo thứ tự giai đoạn sau core.js và can.js.
-MODULES = ("dao", "khi", "the", "phap", "menh", "su", "su_tale", "su_tale2", "su_chain")
+MODULES = ("dao", "khi", "the", "phap", "menh", "bao", "su", "su_tale", "su_tale2", "su_chain")
 
 
 def with_base(text, base):
@@ -138,6 +168,7 @@ def head_tags(base):
         "<meta http-equiv=\"Content-Security-Policy\" content=\"connect-src 'self'\"/>"
         f'<script>globalThis.__VK2_BASE="{base}"</script>'
         f'<script src="{base}/vk2/guard.js"></script>'
+        f'<script src="{base}/vk2/gear.js"></script>'
     )
 
 
@@ -171,7 +202,10 @@ def main():
     if OUT.exists():
         shutil.rmtree(OUT)
     shutil.copytree(SRC, OUT)
-    shutil.copytree(MOD, OUT / "vk2", ignore=shutil.ignore_patterns("tests"))
+    shutil.copytree(MOD, OUT / "vk2", ignore=shutil.ignore_patterns("tests", "icons"))
+    # Ô đồ của game đọc ảnh theo id tại /icons/<id>.png
+    for icon in (MOD / "icons").glob("*.png"):
+        shutil.copy2(icon, OUT / "icons" / icon.name)
 
     for name, edits in PATCHES.items():
         path = OUT / CHUNKS / name

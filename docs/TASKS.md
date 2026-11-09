@@ -151,3 +151,11 @@ Trước đợt này, một số hệ thống hiện trên bảng của mod như
 - [x] `vk2/tests/popups.js`: mọi test Playwright tự dọn cảnh báo đồng đạo, truyện tranh và thương nhân lưu động.
 - [ ] Đo tốc độ trên điện thoại thật.
 - [ ] Người chơi thật đánh giá về thẩm mỹ.
+
+## Trang bị Tuyệt phẩm và linh thú mới (09/11/2026)
+- [x] Phẩm thứ 5 trong bảng đồ thật của game: nhãn, màu, giá bán, ảnh
+- [x] 9 món ở 3 mốc Nguyên Anh, Độ Kiếp, Kim Tiên; mỗi món có một thần thông đi vào cơ chế trận chung
+- [x] Đúc từ một món Cực phẩm cùng loại, Thiên Công Tinh Hoa và linh thạch; không rơi từ quái, không bán ở chợ
+- [x] 8 linh thú (3 SR, 3 SSR, 2 SSS) trong bảng dị thú thật: sổ, trận thu phục, tiến hóa của game
+- [x] Bảng Tuyệt Phẩm ở nhóm Sản nghiệp, mục nối từ Túi đồ, 3 nhiệm vụ
+- [ ] Tốc độ kiếm tinh hoa và tỷ lệ gặp thú chưa được đo qua người chơi thật
