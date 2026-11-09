@@ -1,5 +1,58 @@
 # TEST REPORT
 
+## 3.0-GĐ1: căn cơ (09/11/2026)
+
+Bản local, Edge headless, Node 24.15.
+
+| Bộ kiểm thử | Kết quả | Lệnh |
+|---|---:|---|
+| Logic VK2 cũ | 26/26 | `node --test vk2/tests/core.test.js` |
+| Logic căn cơ | 35/35 | `node --test vk2/tests/can.test.js` |
+| Căn cơ trong game thật | 41/41 | `node vk2/tests/can_e2e.js` |
+| End-to-end VK2 cũ | 52/52 | `node vk2/tests/e2e.js` |
+| Giả lập điện thoại | Tất cả đạt | `VK2_URL=... node vk2/tests/mobile.js` |
+| Tắt hẳn trình duyệt | Tất cả đạt | `node vk2/tests/restart.js <thư-mục>` |
+| Đường dẫn thư mục con | Tất cả đạt | `VK2_URL=.../bok node vk2/tests/pages.js` |
+| Mô phỏng 1.200 kiếp | 0 lỗi, 0 vi phạm bất biến | `node vk2/tests/sim.js 100` |
+
+**Độ ổn định của `can_e2e.js`:** các lượt đầu có lỗi chập chờn do chính test (popup chặn năm đầu, hạn chờ nhân vật chết quá ngắn, so sánh quá chặt sau khi tải lại), đã sửa trong test. Sau đó nhiều lần liên tiếp đều 41/41. Hai vấn đề khác cũng là của test, không phải của game:
+
+- **Test dừng giữa chừng, không in kết quả:** test tự chọn đáp án sự kiện, và có đáp án giết nhân vật thật. Dấu vết của một lần tái hiện ghi rõ nhân vật chết vì sự kiện "Mãng xà ngàn năm" (khoảng 1 trong 5 lần chạy). Test giờ tự chạy lại từ đầu tối đa 3 lần và báo rõ, các lỗi khác vẫn dừng với thông báo "KHÔNG có kết quả". Lỗi nhân vật null từng gặp ở các lượt đầu nhiều khả năng cùng nguyên nhân, nhưng lần đó không có dấu vết để xác nhận.
+- **Năm căn cơ lệch tuổi:** sự kiện của game cộng thẳng 5–59 năm vào tuổi mà không qua hàm năm. Năm kế căn cơ bắt kịp và chỉ tính một năm tu luyện, nay đã có test đơn vị; test giao diện chờ bắt kịp rồi mới so.
+
+### Mô phỏng
+
+`sim.js` chạy hàm một năm, hàm áp lựa chọn và hàm tạo nhân vật thật của bundle. 6 cấu hình, 100 kiếp mỗi cấu hình và 100 kiếp đối chứng tắt căn cơ. Mỗi cấu hình kiểm bất biến sau từng năm: chỉ số trong miền hợp lệ, thể chất có thật, việc đúc không kẹt, tới Nguyên Anh phải có đạo cơ.
+
+| Cấu hình | ≥Kim Đan | ≥Hóa Thần | Tuổi vào Kim Đan | Tuổi thọ TB | Kim Đan Thượng trở lên |
+|---|---:|---:|---:|---:|---:|
+| Cân bằng | 71% (đối chứng 71%) | 33% (18%) | 43 (47) | 165 (147) | 12% |
+| Ổn định | 71% (65%) | 19% (22%) | 50 (45) | 162 (147) | 54% |
+| Cưỡng ép | 65% (70%) | 6% (20%) | 41 (48) | 117 (151) | 0% |
+| Xoay trọng tâm | 48% (49%) | 14% (16%) | 66 (70) | 110 (126) | 39% |
+| Tà đạo liều lĩnh | 74% (76%) | 11% (22%) | 30 (34) | 70 (90) | 10% |
+| Luyện đan | 3% (12%) | 0% (0%) | 65 (66) | 39 (44) | 1% |
+
+Cách đọc: 100 kiếp có sai số lớn, chênh dưới khoảng 10 điểm phần trăm chưa nói lên gì. Ở lượt 200 kiếp trước đó (thông số gần như giống), Cân bằng là 34% so với 29% ở ≥Hóa Thần, nên con số 33% so với 18% ở bảng trên nhiều khả năng là nhiễu. Cấu hình Luyện đan chết chủ yếu vì nổ lò của game gốc do không đổi trọng tâm, đối chứng cũng vậy.
+
+**Lỗi cân bằng do mô phỏng tìm ra và đã sửa:** Cưỡng ép chậm hơn đối chứng mà còn chết sớm hơn; nội thương tự khuếch đại, chạm 100 sau khoảng 18 năm; Ổn định làm hỏng nhịp tuổi phàm nhân; đạo cơ gần như chỉ ra Trung phẩm; Luân Hồi Đạo Thể, Cửu Âm Huyền Thể và Trường Sinh Thể quá phổ biến. Sau khi sửa, tỷ lệ kiếp có thể chất đặc biệt là 10–37% tùy cấu hình (Phàm Thể 63–90%, không tính cấu hình Luyện đan); Ổn định có Cửu Âm 17%, Cân bằng có Luân Hồi 17%. Chưa rõ mức này đã đủ hiếm với người chơi thật hay chưa.
+
+### Lỗi kiểm thử tìm ra và đã sửa
+
+| Lỗi | Cách sửa |
+|---|---|
+| Có việc đúc thì mất nút Thiên phú trên HUD (E2E cũ phát hiện) | Giữ cả hai nút, thêm nút ngắn |
+| Thông báo chồng 10 dòng che bảng ở tốc độ cao | Hiện tối đa 4, nội dung vẫn nằm trong nhật ký |
+| Nhảy cóc qua Kim Đan: đạo cơ chờ thêm một nhịp | Đổi thứ tự xử lý |
+
+### Chưa kiểm chứng
+
+- **Trận đấu thời gian thực** không có trong mô phỏng (săn quái, phục kích, mini-game đỡ lôi), nên số trận thắng thấp hơn chơi thật. Hoang Cổ Thánh Thể, Bất Diệt Ma Thể và Kiếm Cốt gần như không xuất hiện, nên độ cân bằng của chúng chưa được đo. Logic thức tỉnh của chúng chỉ qua test đơn vị.
+- **Đạo cơ trong game thật** được test bằng cách đặt cảnh giới rồi bấm giao diện. Đột phá thật được chạy trong mô phỏng, chưa có test giao diện cho đúng lượt đột phá đó.
+- **Chiến lược chọn trong mô phỏng** là chiến lược máy, không phải người chơi. Chưa ai chơi một mạch tới Phi Thăng với căn cơ.
+- **Phi thăng và cảnh giới Tiên:** rất ít kiếp mô phỏng tới Độ Kiếp, chưa có kiếp nào được xác nhận đi qua phi thăng cùng căn cơ.
+- **Chưa chạy:** giao diện tiếng Anh, điện thoại thật, Safari. Bản `play/` đã dựng nhưng chưa deploy lên Pages thật.
+
 Ngày chạy: 09/11/2026 · Node 24.15 · Microsoft Edge headless · Bản dựng: `site-mod/`
 
 ## Kết quả

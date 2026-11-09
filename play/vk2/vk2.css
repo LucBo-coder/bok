@@ -68,6 +68,11 @@
 .vk2-branch { display: grid; gap: 6px; margin-top: 4px; }
 .vk2-branch .vk2-btn { text-align: left; display: grid; }
 
+.vk2-meters { display: grid; gap: 8px; }
+.vk2-meter .vk2-q-top { font-size: 15px; }
+.vk2-meter small, .vk2-meters > small { color: var(--muted); font-size: 13px; line-height: 1.3; display: block; }
+.vk2-bodies { list-style: none; padding: 0; display: grid; gap: 6px; }
+.vk2-bodies li { background: var(--paper-3); border: 2px solid var(--shadow); padding: 6px 8px; overflow-wrap: anywhere; }
 .vk2-els { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
 .vk2-el { padding: 4px 12px; border: 2px dashed var(--shadow); color: var(--muted); font-weight: 600; }
 .vk2-el.has { border-style: solid; color: var(--paper-3); border-color: var(--ink); }

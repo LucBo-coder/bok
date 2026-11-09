@@ -15,3 +15,5 @@ Nhật ký các kiếp, dòng thời gian, ký ức tiền kiếp mới, thế g
 ## Sổ các kiếp trước
 
 Khi một kiếp kết thúc, `recordDeath` ghi tóm tắt vào `acct.history` (chỉ thêm một lần cho mỗi kiếp). Tab Hành trình hiển thị danh sách này, mới nhất trước.
+
+Từ 3.0-GĐ1, mỗi dòng còn ghi thể chất, số kinh mạch và phẩm đạo cơ, Kim Đan của kiếp đó (`can`). Căn cơ không truyền sang kiếp sau: mỗi kiếp xây lại từ đầu, chỉ có Luân Hồi Đạo Thể mở ra nhờ số kiếp đã trải. Cơ chế luân hồi của game không đổi.

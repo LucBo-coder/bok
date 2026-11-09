@@ -80,9 +80,11 @@
       case "a_maxRealm": return Math.max(acct?.maxRealm ?? 0, c.realm ?? 0);
       case "a_kills": return acct?.c?.kills ?? 0;
       case "revenge": return Math.max(acct?.c?.revenge ?? 0, c.qf?.revenge ?? 0);
-      default:
+      default: {
         if (name.startsWith("path_")) return c.path === name.slice(5) ? 1 : 0;
-        return v?.c?.[name] ?? 0;
+        const can = root.VK2Can?.metric(name, c);
+        return can !== undefined ? can : v?.c?.[name] ?? 0;
+      }
     }
   }
 
@@ -100,8 +102,8 @@
   function addXp(c, id, n) {
     const t = c.vk2.talents[id];
     if (!t || !c.vk2.active.includes(id) || t.lv >= 5) return;
-    const mul = rootInfo(c).affine ? D.AFFINITY.xpMul : 1;
-    t.xp = Math.min(talentThreshold(talentDef.get(id), t.lv), t.xp + n * mul);
+    const mul = (rootInfo(c).affine ? D.AFFINITY.xpMul : 1) * (root.VK2Can?.insight(c) ?? 1);
+    t.xp =Math.min(talentThreshold(talentDef.get(id), t.lv), t.xp + n * mul);
   }
 
   /** Cộng bộ đếm hành vi, và chỉ thiên phú đang vận hành mới hưởng kinh nghiệm. */
@@ -116,6 +118,7 @@
       const w = talentDef.get(id)?.xp?.[name];
       if (w) addXp(c, id, w * n);
     }
+    root.VK2Can?.onBump(c, name, n);
   }
 
   function canAwaken(def, c, acct) {
@@ -214,6 +217,7 @@
         if (t && def) add(talentFx(def, t.lv, t.branch));
       }
     }
+    for (const fx of root.VK2Can?.fx(c) ?? []) add(fx);
     const out = {};
     for (const k of Object.keys(pos)) out[k] = softcap(pos[k], D.SOFTCAP[k]) + neg[k];
     return out;
@@ -228,7 +232,7 @@
     return n * D.PREP_BONUS;
   }
 
-  const cultMul = (c) => Math.max(0.1, 1 + totals(c).cult);
+  const cultMul = (c) => Math.max(0.1, 1 + totals(c).cult) * (root.VK2Can?.cultFactor(c) ?? 1);
   const breakBonus = (c) => totals(c).brk + prepBonus(c);
   function statMul(c, s) {
     const t = totals(c);
@@ -283,6 +287,11 @@
       const cur = metric(q.goal[0], c, acct);
       out.push({ ...q, kind: "realm", r: { prep: 1 }, cur: Math.min(cur, q.goal[1]), need: q.goal[1], status: statusOf(cur, q.goal[1], v.claimed[q.id], false) });
     }
+    for (const q of root.VK2Can?.QUESTS ?? []) {
+      const cur = metric(q.goal[0], c, acct);
+      const locked = !!q.after && !v.claimed[q.after];
+      out.push({ ...q, kind: "can", cur: Math.min(cur, q.goal[1]), need: q.goal[1], status: statusOf(cur, q.goal[1], v.claimed[q.id], locked) });
+    }
     for (const id of v.active) {
       const t = v.talents[id];
       const def = talentDef.get(id);
@@ -318,7 +327,7 @@
   /** Tối đa 3 nhiệm vụ theo dõi: ưu tiên đã ghim, kế đến việc chờ nhận thưởng, rồi theo độ ưu tiên từng loại. */
   function tracked(list, pins = [], max = 3) {
     const open = list.filter((q) => q.status === "active" || q.status === "complete");
-    const rank = { main: 0, talent: 1, realm: 2, daily: 3, life: 4 };
+    const rank = { main: 0, talent: 1, realm: 2, can: 2.5, daily: 3, life: 4 };
     const score = (q) => (pins.includes(q.id) ? -100 : 0) + (q.status === "complete" ? -10 : 0) + rank[q.kind];
     return open
       .map((q, i) => [score(q), i, q])
@@ -389,8 +398,9 @@
     if ((c.realm ?? 0) > (acct.maxRealm ?? 0)) acct.maxRealm = c.realm;
     if ((c.qf?.revenge ?? 0) > (acct.c.revenge ?? 0)) acct.c.revenge = c.qf.revenge;
     const woken = c.dead ? [] : checkAwaken(c, acct);
+    const notes = root.VK2Can?.tick(c, acct) ?? [];
     const died = c.dead && recordDeath(c, acct);
-    return { woken, died };
+    return { woken, died, notes };
   }
 
   /** Ghi sổ thiên phú một lần cho mỗi kiếp, nền cho hệ luân hồi ở giai đoạn sau. */
@@ -406,6 +416,7 @@
         life, name: c.name ?? "", realm: c.realm ?? 0, layer: c.layer ?? 0, age: Math.floor(c.age ?? 0), path: c.path ?? null,
         cause: typeof c.cause === "string" ? c.cause : null, kills: c.vk2?.c?.kills ?? 0,
         talents: Object.entries(c.vk2?.talents ?? {}).map(([id, t]) => [id, t.lv]),
+        can: root.VK2Can?.summary(c) ?? null,
       },
     ].slice(-MAX_HISTORY);
     return true;

@@ -37,6 +37,10 @@ drop table vkl_quest_claims;
 - Cần giới hạn tần suất RPC này.
 - **Điểm khó:** tiến trình hiện tính ở client, nên server cần cách tự xác nhận (ví dụ từ `vkl_lives` và save). Phải thiết kế lại khi có source server.
 
+## `char.vk2.can` (thêm 09/11/2026)
+
+Căn cơ của kiếp hiện tại, đi theo save của game: `{ v, method, year, purity, stability, dantian, open, openProg, tieu, tieuCount, dai, daiCount, injury, impurity, body: { id, xp, innate }, daoCo, kimDan, pending, failSeen, warned, closed }`. `daoCo` và `kimDan` có dạng `{ grade, score, how, remolded }`. Save chưa có trường này được tạo khi nạp, không đổi dữ liệu cũ. `acct.history` thêm trường `can: { body, open, dao, dan }`.
+
 ## `acct.history` (thêm 09/11/2026)
 
 Mảng tối đa 30 kiếp gần nhất trong state tài khoản ở localStorage, mỗi phần tử: `{ life, name, realm, layer, age, path, cause, kills, talents: [[id, lv]] }`. Save cũ không có trường này vẫn chạy; lịch sử bắt đầu từ lần chết kế tiếp.

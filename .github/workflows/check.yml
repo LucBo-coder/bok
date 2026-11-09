@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: "22"
       - name: Test game logic
-        run: node --test vk2/tests/core.test.js
+        run: node --test vk2/tests/core.test.js vk2/tests/can.test.js
       - name: Published copy must match the sources
         run: |
           python build_mod.py --base /bok/play --out play

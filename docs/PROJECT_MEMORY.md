@@ -28,13 +28,23 @@
 
 Chunk `0pcagq3015zh_`: `nM` tốc độ tu, `nd` chỉ số chiến đấu, `nx(n,a,h)` thưởng thắng quái.
 
+Export của `O` trong chunk `2weh91tpivddk`: `O.f` một năm (`nP`), `O.x` áp lựa chọn sự kiện, `O.v` dựng ctx, `O.n(meta, talents)` tạo nhân vật. Mod truy cập qua `bridge.game`. Sự kiện đột phá có id `__dot_pha`, lựa chọn nghiêng chính đạo thường là "Củng cố" (hoãn).
+
 ## Lệnh
 
 ```powershell
-python build_mod.py
+python build_mod.py   # Git Bash trên Windows: thêm PYTHONIOENCODING=utf-8, nếu không dòng in cuối sẽ báo lỗi mã hóa dù bản dựng đã xong
 python serve_mod.py   # http://127.0.0.1:8766/choi/
-node --test vk2/tests/core.test.js
+node --test vk2/tests/core.test.js vk2/tests/can.test.js
+node vk2/tests/sim.js 100   # Mô phỏng trên logic game thật, cần server và playwright-core
 ```
+
+## Căn cơ (3.0-GĐ1, 09/11/2026)
+
+- Logic nằm ở `vk2/can.js`, nạp sau `core.js`. `core.js` gọi qua `root.VK2Can?.`, nên `core.test.js` vẫn chạy được khi không nạp module này.
+- Trạng thái ở `char.vk2.can`. Xử lý năm ở `onYear` (đúng một lần mỗi năm), việc theo nhịp ở `tick` (đột phá, thất bại, thức tỉnh).
+- Tạo nhân vật thẳng ở cảnh giới cao khi test sẽ bị coi là save cũ (`age >= 1` lúc `ensure`). Dùng helper `fresh()` trong `can.test.js`.
+- **Muốn đổi thông số thì chạy lại `sim.js`** và so với đối chứng, đừng chỉnh theo cảm giác. Chênh dưới khoảng 10 điểm phần trăm ở 100 kiếp là nhiễu.
 
 ## Xuất bản và giao diện nhật ký (09/11/2026)
 

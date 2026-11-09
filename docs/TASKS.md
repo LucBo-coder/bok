@@ -52,9 +52,54 @@ Nguồn là bundle production đã minify, không có TypeScript, API server hay
 - [ ] Thức tỉnh từ cơ duyên, bí cảnh, truyền thừa: cần GĐ4
 - [ ] Hiệu ứng thức tỉnh: mới có thông báo, chưa có animation riêng
 
-## Các giai đoạn sau: chưa bắt đầu
+## Kế hoạch 3.0
 
-GĐ3 tu luyện chuyên sâu · GĐ4 thế giới · GĐ5 nhân quả và luân hồi · GĐ6 cân bằng và tối ưu.
+Master prompt 3.0 (09/11/2026) thay cho các mục GĐ3–GĐ6 cũ, và có cách đánh số giai đoạn riêng (3.0-GĐ1 đến 3.0-GĐ6).
+
+### Đối chiếu 18 hệ thống với code hiện có
+
+"Mức đọc" cho biết độ tin cậy của cột Hiện trạng: chỉ tìm từ khóa thì phải đọc kỹ lại code trước khi thiết kế giai đoạn đó.
+
+| # | Hệ thống | Game gốc đã có | Mức đọc | Giai đoạn | Trạng thái |
+|---:|---|---|---|---:|---|
+| 1 | Kinh mạch, đan điền, chu thiên | Chỉ có văn bản; sự kiện khổ tu quá độ | Đọc kỹ | 1 | **Xong** |
+| 2 | Thể chất và huyết mạch | Không có thể chất; huyết mạch `huyetMach` từ linh thú | Đọc một phần | 1 | **Thể chất xong**; huyết mạch qua cơ duyên, gia tộc chờ GĐ2, GĐ4 |
+| 3 | Đạo cơ, phẩm chất Kim Đan | Chỉ có văn bản | Đọc kỹ | 1 | **Xong** |
+| 4 | Ngộ đạo, sáng tạo công pháp | Công pháp có tầng và kinh nghiệm, lĩnh ngộ chiêu từ quái; chưa có kết hợp | Từ khóa | 2 | Chưa làm |
+| 5 | Bí cảnh nhiều tầng | Dạng sự kiện (`bi_canh`), chưa có tầng và rút lui | Từ khóa | 2 | Chưa làm |
+| 6 | Truyền thừa cổ tu | Truyền công pháp qua kiếp (`cpHeir`, `cpBook`); chưa có truyền thừa theo đạo | Từ khóa | 2 | Chưa làm |
+| 7 | Sư đồ | Chuỗi sự kiện nhận đồ đệ, phản sư, sư phụ chỉ điểm; đồ đệ chưa có tiến trình riêng | Từ khóa | 4 | Chưa làm |
+| 8 | Tông môn động | Nhiều tông, cấp bậc, thí luyện; chưa có lãnh thổ, chiến tranh | Từ khóa | 4 | Chưa làm |
+| 9 | Gia tộc | Chỉ có xuất thân và văn bản | Từ khóa | 4 | Chưa làm |
+| 10 | Luyện khí, phù lục, bản mệnh | Có Lò rèn (`forge`, `forgeMap`); "bản mệnh" chỉ là hệ ngũ hành; không có phù lục | Từ khóa | 3 | Chưa làm |
+| 11 | Động phủ | Bế quan có thật, động phủ chỉ là văn bản | Đọc một phần | 3 | Chưa làm |
+| 12 | Tâm ma, chấp niệm | Chỉ số tâm ma và sự kiện `tam_ma`; chưa dựa trên lịch sử nhân vật | Đọc một phần | 5 | Chưa làm |
+| 13 | Pháp tắc, Đại Đạo | Không có | Từ khóa | 5 | Chưa làm |
+| 14 | NPC tự phát triển | Oan gia và kẻ thù có tên, không có mô phỏng theo năm | Từ khóa | 4 | Chưa làm |
+| 15 | Đại sự kiện thế giới | Thiên tượng hằng ngày, Tiên Ma đại chiến dạng sự kiện | Từ khóa | 5 | Chưa làm |
+| 16 | Thiên Đạo ghi nhớ | Kiếp Số, nghiệp lực, sự kiện "Thiên đạo chú ý" | Từ khóa | 6 | Chưa làm |
+| 17 | Thiên Mệnh cá nhân | Chỉ có thiên phú mua "Thiên mệnh chi tử" và chuỗi Hệ Thống | Từ khóa | 6 | Chưa làm |
+| 18 | Nhân quả, truyền thừa xuyên kiếp | Oan gia, bia mộ, huyết mạch, rương chôn, Mạnh Bà, Thiên thư; chưa có di sản trong thế giới | Đọc một phần | 6 | Chưa làm |
+
+### 3.0-GĐ1 — Căn cơ: xong ở mức client sandbox
+
+Code: `vk2/can.js`. Chi tiết ở [CULTIVATION_SYSTEM](CULTIVATION_SYSTEM.md), kết quả ở [TEST_REPORT](TEST_REPORT.md).
+
+- [x] Đan điền, độ tinh thuần, độ ổn định, 20 kinh mạch, nội thương, tạp chất
+- [x] 3 phương pháp tu luyện, tích hợp vào trọng tâm Tu luyện và bế quan, không có thao tác lặp
+- [x] Tiểu chu thiên, đại chu thiên, xung mạch có thể thất bại
+- [x] 10 thể chất có điều kiện, ưu điểm, nhược điểm, cách phát triển và 3 giai đoạn
+- [x] Đúc đạo cơ và ngưng Kim Đan có 4 cách, phẩm chất dựa trên 6 yếu tố gồm cả thiên tượng; có cải tạo về sau
+- [x] Tab Căn Cơ, nút báo trên HUD, ghi nhật ký game, tab Hành trình, sổ kiếp
+- [x] 8 nhiệm vụ căn cơ trong hệ VK2, save cũ được ghi nhận không phát thưởng bù
+- [x] Mô phỏng trên logic game thật, có đối chứng
+- [ ] Cân bằng bằng chơi thật: thông số mới được chỉnh theo mô phỏng, chưa có người chơi thật
+- [ ] Mô phỏng chưa gồm trận đấu thời gian thực, nên các thể chất cần nhiều trận thắng chưa được đo
+- [ ] Huyết mạch thức tỉnh qua cơ duyên, truyền thừa, gia tộc: cần GĐ2 và GĐ4
+
+### Các giai đoạn 3.0 còn lại: chưa bắt đầu
+
+GĐ2 bí cảnh, truyền thừa, ngộ đạo, sáng tạo công pháp · GĐ3 luyện khí, phù lục, bản mệnh, động phủ · GĐ4 sư đồ, gia tộc, tông môn động, NPC · GĐ5 tâm ma, pháp tắc, đại sự kiện · GĐ6 Thiên Đạo, Thiên Mệnh, nhân quả xuyên kiếp.
 
 ## Phạm vi hiện tại
 

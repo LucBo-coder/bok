@@ -8,6 +8,7 @@ Trạng thái: đã triển khai ở client sandbox. Code: `vk2/data.js`, `vk2/c
 |---|---:|---|---|
 | Chính tuyến | 19 | Nhân vật | Linh thạch, chỉ số, tu vi theo số năm |
 | Chuẩn bị đột phá | 18 (3 mỗi cảnh giới) | Nhân vật | +2% tỷ lệ đột phá kế tiếp |
+| Căn cơ | 8 | Nhân vật | Linh thạch, chỉ số |
 | Thiên phú | Theo thiên phú đang vận hành | Nhân vật | Lên bậc |
 | Hằng ngày | 3/ngày từ 6 việc | Tài khoản | Linh thạch theo cảnh giới, kinh nghiệm thiên phú |
 | Luân hồi | 7 | Tài khoản | Phúc duyên, một lần |

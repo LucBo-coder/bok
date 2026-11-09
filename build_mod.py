@@ -20,10 +20,14 @@ PATCHES = {
         (
             "let tk=nq.current,",
             f"{HOOK}&&{HOOK}.bind({{charRef:nq,metaRef:F,setMeta:E,saveMeta:e=>(0,X.m)(nA.current,e).catch(()=>{{}}),"
-            "rerender:nG,save:nV,openPanel:eq,mutate:tl,setRunning:eF,running:eE,user:j});let tk=nq.current,",
+            "rerender:nG,save:nV,openPanel:eq,mutate:tl,setRunning:eF,running:eE,user:j,game:O});let tk=nq.current,",
         ),
     ],
     "0pcagq3015zh_.js": [
+        # Một năm của game: căn cơ được xử lý đúng một lần mỗi năm, kể cả trong bế quan
+        ("function nP(n,l){var", f"function nP(n,l){{{HOOK}&&{HOOK}.onYear(n,arguments[2]);var"),
+        # Hàm kiểm tra thiên tượng hôm nay, dùng khi đúc đạo cơ và Kim Đan
+        ('.06*!!(0,r.w)("loi_van")', f'.06*!!({HOOK}&&{HOOK}.captureOmen(r.w),(0,r.w)("loi_van"))'),
         # Tốc độ tu luyện
         (
             "function nM(n){let t=nf[n.realm]??90,",
@@ -68,6 +72,7 @@ def game_tags(base):
         f'<link rel="stylesheet" href="{base}/vk2/vk2.css"/>'
         f'<script src="{base}/vk2/data.js"></script>'
         f'<script src="{base}/vk2/core.js"></script>'
+        f'<script src="{base}/vk2/can.js"></script>'
         f'<script src="{base}/vk2/ui.js"></script>'
     )
 

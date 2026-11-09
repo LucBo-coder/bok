@@ -1,5 +1,11 @@
 # Vạn Kiếp Luân Hồi — bản sao client
 
+*Một kiếp người, vạn con đường tu tiên.*
+
+Game pixel tu tiên trùng sinh chơi trên trình duyệt. Bạn đầu thai với linh căn và xuất thân ngẫu nhiên, mỗi năm chọn một trọng tâm để sống, rồi đi từ phàm nhân tới phi thăng theo một trong sáu con đường: Kiếm, Đan, Trận, Phật, Ma, Yêu. Mỗi kỳ ngộ đẩy Đạo tâm về phía Chính hoặc Tà. Khi hết thọ nguyên, bạn để lại bia mộ và mang phúc duyên sang kiếp sau. Bản 2.0 thêm nhiệm vụ, thiên phú lớn dần theo cách sống, và linh căn đa hệ.
+
+Chơi ngay: https://lucbo-coder.github.io/bok/play/choi/ · Mô tả đầy đủ: [docs/GAME_DESIGN.md](docs/GAME_DESIGN.md)
+
 - **Nguồn:** https://van-kiep-luan-hoi.vercel.app/
 - **Ngày thu thập:** 09/11/2026
 - **Nội dung:** toàn bộ phần client công khai (HTML, JS, CSS, hình ảnh, dữ liệu i18n) và một bản mirror chạy được offline.

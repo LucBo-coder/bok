@@ -6,6 +6,8 @@ Trạng thái: đã triển khai ở client sandbox. Thông số là giá trị 
 
 Thiên phú mua bằng phúc duyên khi đầu thai của game gốc được giữ nguyên, vì chúng là lựa chọn lúc sinh ra. Thiên phú VK2 là thứ lớn lên trong kiếp, thức tỉnh từ cách người chơi sống. Hai hệ cộng dồn với nhau.
 
+Thiên phú khác với linh căn (khả năng hấp thu linh khí) và thể chất (đặc điểm thân thể, xem [CULTIVATION_SYSTEM](CULTIVATION_SYSTEM.md)). Từ 3.0-GĐ1, phẩm chất đạo cơ, Kim Đan và Luân Hồi Đạo Thể nhân kinh nghiệm thiên phú nhận được (`insight`), từ ×0,81 tới ×1,65.
+
 ## Danh sách
 
 | Thiên phú | Phẩm | Thức tỉnh | Đánh đổi | Nhánh |

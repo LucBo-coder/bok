@@ -4,6 +4,7 @@
   "use strict";
   const C = globalThis.VK2Core;
   const D = globalThis.VK2Data;
+  const K = globalThis.VK2Can;
   const BASE = globalThis.__VK2_BASE ?? ""; // Tiền tố khi site nằm trong thư mục con, ví dụ GitHub Pages
   let bridge = null;
   let nM = null;
@@ -15,6 +16,7 @@
   const toastSeen = new Set();
   let toastLife = null;
   let flashTimer = 0;
+  const MAX_TOASTS = 4;
 
   const lang = () => {
     try {
@@ -157,11 +159,13 @@
     const collapsed = inEvent || innerHeight <= 520 || collapsedPref();
     const next = top[0];
     const summary = next ? `<span class="vk2-hud-next">${esc(L(next.t))} <i>${fmt(next.cur)}/${fmt(next.need)}</i></span>` : "";
+    const pending = K.ensure(c, a).pending;
     return `<div class="vk2-hud-head">
         <button class="vk2-link vk2-hud-toggle" data-act="collapse" aria-expanded="${!collapsed}" ${inEvent ? "disabled" : ""}><b>${T("Mục tiêu", "Goals")}</b>${ready ? ` <em>${ready}</em>` : ""} <span>${collapsed ? "▸" : "▾"}</span>${collapsed ? summary : ""}</button>
         <span class="vk2-hud-tabs">
           <button class="vk2-btn" data-act="tab" data-tab="journey">${T("Hành trình", "Journey")}</button>
           <button class="vk2-btn" data-act="tab" data-tab="talents">${T("Thiên phú", "Talents")}</button>
+          ${pending ? `<button class="vk2-btn vk2-claim" data-act="tab" data-tab="can" aria-label="${pending.kind === "dao" ? T("Đúc đạo cơ", "Forge your Dao Foundation") : T("Ngưng Kim Đan", "Condense your Golden Core")}">${pending.kind === "dao" ? T("Đúc", "Forge") : T("Ngưng", "Core")}</button>` : ""}
         </span>
       </div>
       ${collapsed ? "" : `<div class="vk2-hud-list">${top.map(questRow).join("") || `<small>${T("Chưa có mục tiêu mới.", "No new goals.")}</small>`}<button class="vk2-btn" data-act="tab" data-tab="quests">${T("Xem toàn bộ nhiệm vụ", "All quests")}</button></div>`}`;
@@ -174,6 +178,7 @@
     const groups = [
       ["main", T("Chính tuyến", "Main story")],
       ["realm", T("Chuẩn bị đột phá", "Breakthrough preparation")],
+      ["can", T("Căn cơ", "Foundation")],
       ["talent", T("Thiên phú", "Talents")],
       ["daily", T("Hằng ngày", "Daily")],
       ["life", T("Luân hồi (qua nhiều kiếp)", "Samsara (across lives)")],
@@ -276,6 +281,102 @@
         .join("")}</tbody></table>
     </div>`;
   }
+  // ---------- Tab Căn Cơ ----------
+
+  function pastCanText(s) {
+    const grade = (g) => (g ? L(K.GRADES[g].n) : T("chưa có", "none"));
+    return `${L(K.bodyDef.get(s.body)?.n ?? ["", ""])} · ${T("kinh mạch", "meridians")} ${s.open} · ${T("đạo cơ", "base")} ${grade(s.dao)} · Kim Đan ${grade(s.dan)}`;
+  }
+
+  function meter(label, val, max, hint) {
+    const pct = max > 0 ? Math.round((Math.min(val, max) / max) * 100) : 0;
+    return `<div class="vk2-meter"><div class="vk2-q-top"><span>${esc(label)}</span><span class="vk2-q-num">${fmt(Math.floor(val))}/${fmt(max)}</span></div><div class="vk2-bar"><i style="width:${pct}%"></i></div>${hint ? `<small>${esc(hint)}</small>` : ""}</div>`;
+  }
+
+  function forgeCard(c, kind) {
+    const can = c.vk2.can;
+    const conf = K.FORGE_KINDS[kind];
+    const cur = can[conf.field];
+    const name = L(conf.def.name);
+    if (cur) {
+      const g = K.GRADES[cur.grade];
+      const canUp = !cur.remolded && cur.grade < 4;
+      return `<div class="vk2-t"><div><b>${esc(name)}</b> <span class="vk2-qual ${g.cls}">${esc(L(g.n))}</span>${cur.how === "legacy" ? ` <small>${T("(ước lượng từ save cũ)", "(estimated from an old save)")}</small>` : ""}</div>
+        <small>${T("Hiệu ứng", "Effect")}: ${esc(fxText(conf.def.fx[cur.grade]) || T("không tăng không giảm", "none"))} · ${T("lĩnh ngộ", "insight")} ×${conf.def.insight[cur.grade]}</small>
+        ${cur.remolded ? `<small>${T("Đã cải tạo một lần trong kiếp này.", "Already remade once this life.")}</small>` : ""}
+        ${canUp ? `<small>${T(`Cải tạo: từ ${L(D.REALM_LABELS[conf.remoldRealm])}, ${fmt(conf.remoldCost)} linh thạch, nội thương +15, tâm ma +10, tăng một phẩm. Một lần mỗi kiếp.`, `Remake: from ${L(D.REALM_LABELS[conf.remoldRealm])}, ${fmt(conf.remoldCost)} stones, wounds +15, demons +10, raises one grade. Once per life.`)}</small>
+          <div class="vk2-t-act"><button class="vk2-btn" data-act="remold" data-id="${kind}" ${K.canRemold(c, kind) ? "" : "disabled"}>${T("Cải tạo", "Remake")}</button></div>` : ""}</div>`;
+    }
+    if (can.pending?.kind === kind) {
+      const base = Math.round(K.forgeBase(c, kind));
+      const left = K.PENDING_YEARS - (Math.floor(c.age ?? 0) - can.pending.at);
+      return `<div class="vk2-t on"><b>${T(`Chọn cách đúc ${name}`, `Choose how to forge your ${name}`)}</b>
+        <small>${T(`Điểm căn cơ hiện tại: ${base}. Mốc Trung, Thượng, Tuyệt phẩm: ${conf.def.cut.join(", ")}. Còn ${left} năm, quá hạn sẽ tự thành theo tự nhiên.`, `Current score: ${base}. Mid, High, Peerless at ${conf.def.cut.join(", ")}. ${left} yr left, then it forms naturally.`)}</small>
+        <div class="vk2-branch">${K.forgeOptions(c, kind)
+          .map((o) => `<button class="vk2-btn" data-act="forge" data-id="${kind}" data-opt="${o.id}" ${o.ok ? "" : "disabled"}><b>${esc(L(o.n))}${o.cost ? ` · ${fmt(o.cost)} ${T("linh thạch", "stones")}` : ""}</b><small>${esc(L(o.d))}</small></button>`)
+          .join("")}</div></div>`;
+    }
+    return `<div class="vk2-t locked"><b>${esc(name)}</b>
+      <small>${T(`Mở khi đạt ${L(D.REALM_LABELS[conf.realm])}. Điểm dự kiến hiện tại: ${Math.round(K.forgeBase(c, kind))}. Mốc Trung, Thượng, Tuyệt phẩm: ${conf.def.cut.join(", ")}.`, `Opens at ${L(D.REALM_LABELS[conf.realm])}. Projected score: ${Math.round(K.forgeBase(c, kind))}. Mid, High, Peerless at ${conf.def.cut.join(", ")}.`)}</small>
+      <small>${T("Phụ thuộc độ tinh thuần, ổn định, công pháp, tâm cảnh, thiên tượng; nội thương và tạp chất làm giảm điểm.", "Depends on purity, stability, techniques, mind state and omens; wounds and impurity lower it.")}</small></div>`;
+  }
+
+  function bodyCard(c) {
+    const can = c.vk2.can;
+    const body = K.bodyOf(c);
+    const q = D.QUALITY[body.q];
+    const stage = K.stageOf(can.body.xp);
+    let growth = "";
+    if (body.id !== "pham") {
+      const next = K.STAGES.xp[stage];
+      growth = `${next ? meter(`${L(K.STAGES.names[stage])} → ${L(K.STAGES.names[stage + 1])}`, can.body.xp, next, `${T("Phát triển bằng", "Grows through")}: ${L(body.grow_d)}`) : `<small>${esc(L(K.STAGES.names[stage]))}</small>`}
+        <small>${T("Nhược điểm", "Drawback")}: ${esc(L(body.con_d))}</small>`;
+    }
+    const others = K.BODIES.filter((b) => b.id !== body.id).map((b) => `<li><b>${esc(L(b.n))}</b> <span class="vk2-qual ${D.QUALITY[b.q].cls}">${esc(L(D.QUALITY[b.q].n))}</span><br><small>${esc(L(b.d))}</small><br><small>${T("Điều kiện", "Requires")}: ${esc(L(b.how))}${b.awake ? T(", và phải có duyên", ", and it must be fated") : ""}</small><br><small>${esc(fxText(b.fx))} · ${esc(L(b.con_d))}</small></li>`).join("");
+    return `<div class="vk2-t on"><div><b>${esc(L(body.n))}</b> <span class="vk2-qual ${q.cls}">${esc(L(q.n))}</span>${can.body.innate ? ` <small>${T("bẩm sinh", "innate")}</small>` : ""}</div><p>${esc(L(body.d))}</p>${growth}</div>
+      <details class="vk2-closed"><summary>${T("Các thể chất có thể có", "Known bodies")} (${K.BODIES.length})</summary><ul class="vk2-bodies">${others}</ul></details>
+      <p class="vk2-note">${T("Mỗi kiếp chỉ có một thể chất. Đã có thì không thức tỉnh thêm, nên đôi khi Phàm Thể lại để ngỏ nhiều đường hơn.", "One body per life. Once you have one, no other can awaken, so a Mortal Body keeps more roads open.")}${c.huyetMach?.length ? ` ${T("Huyết mạch kiếp trước vẫn hoạt động riêng.", "Bloodlines from past lives work separately.")}` : ""}</p>`;
+  }
+
+  function canHtml(c, a) {
+    const can = K.ensure(c, a);
+    const cap = K.meridianCap(c);
+    const cost = K.openCost(c, can.open);
+    const m = K.METHODS[can.method];
+    const pills = Object.entries(K.PILL_USES)
+      .map(([id, u]) => {
+        const n = c.pills?.[id] ?? 0;
+        return `<button class="vk2-btn" data-act="pill" data-id="${id}" ${n > 0 ? "" : "disabled"}><b>${esc(L(u.n))} ×${fmt(n)}</b><small>${esc(L(u.d))}</small></button>`;
+      })
+      .join("");
+    return `<p class="vk2-note">${T("Căn cơ phát triển trong những năm chọn trọng tâm Tu luyện, không cần thao tác lặp lại. Linh căn quyết định hấp thu linh khí, thể chất là thân thể, thiên phú là năng lực lớn dần theo cách sống.", "Your base grows during years focused on Cultivation, with no repeated actions. Roots absorb qi, bodies are physical, talents grow from how you live.")}</p>
+      <h3>${T("Phương pháp tu luyện", "Cultivation method")}</h3>
+      <div class="vk2-filters" role="group">${Object.entries(K.METHODS).map(([id, x]) => `<button class="vk2-btn ${id === can.method ? "on" : ""}" aria-pressed="${id === can.method}" data-act="method" data-id="${id}">${esc(L(x.n))}</button>`).join("")}</div>
+      <p class="vk2-note">${esc(L(m.d))} ${T("Tốc độ tu", "Speed")} ×${m.cult}. ${esc(L(m.risk))}.</p>
+      <h3>${T("Đan điền và kinh mạch", "Dantian and meridians")}</h3>
+      <div class="vk2-meters">
+        ${meter(T("Dung lượng đan điền", "Dantian capacity"), can.dantian, K.dantianCap(c), T("Tăng sinh lực. Trần tăng theo cảnh giới và phẩm chất căn cơ.", "Raises HP. The cap grows with realm and grade."))}
+        ${meter(T("Độ tinh thuần linh lực", "Qi purity"), can.purity, 100, T("Tăng công và tỷ lệ đột phá.", "Raises attack and breakthrough."))}
+        ${meter(T("Độ ổn định kinh mạch", "Meridian stability"), can.stability, 100, T("Trên 50 giúp đột phá và khai mạch, dưới 50 thì ngược lại.", "Above 50 helps breakthroughs and opening meridians; below 50 hurts."))}
+        ${meter(T("Kinh mạch đã khai mở", "Meridians opened"), can.open, cap, T(`Mỗi mạch tăng hấp thu linh khí. Tối đa ${K.MERIDIANS.total} (${K.MERIDIANS.regular} chính kinh, ${K.MERIDIANS.extra} kỳ kinh).`, `Each raises qi absorption. Up to ${K.MERIDIANS.total} (${K.MERIDIANS.regular} regular, ${K.MERIDIANS.extra} extraordinary).`))}
+        ${can.open < cap ? meter(T("Tiến độ xung mạch kế tiếp", "Next meridian"), can.openProg, Math.round(cost)) : `<small>${T("Đã chạm trần kinh mạch của cảnh giới này.", "Meridian cap reached for this realm.")}</small>`}
+        ${meter(T("Nội thương", "Inner wounds"), can.injury, 100, T("Giảm tốc độ tu và đột phá. Từ 40 nuôi tâm ma, từ 70 còn mất sức khỏe mỗi năm.", "Lowers speed and breakthrough. From 40 it feeds demons; from 70 it also drains health yearly."))}
+        ${meter(T("Tạp chất", "Impurity"), can.impurity, 100, T("Giảm tốc độ tu và làm xấu phẩm chất đạo cơ, Kim Đan.", "Lowers speed and worsens foundation and core grades."))}
+      </div>
+      <p class="vk2-note">${T(`Hấp thu từ kinh mạch: +${(can.open * 1.2).toFixed(1)}% (trước trần giảm dần).`, `Absorption from meridians: +${(can.open * 1.2).toFixed(1)}% (before diminishing returns).`)}</p>
+      <h3>${T("Chu thiên", "Circulation")}</h3>
+      <div class="vk2-meters">
+        ${meter(`${T("Tiểu chu thiên", "Lesser")} · ${T("đã xong", "done")} ${fmt(can.tieuCount)}`, can.tieu, 100, T("Mỗi vòng tăng độ tinh thuần và đan điền.", "Each cycle raises purity and dantian."))}
+        ${can.open >= 6 ? meter(`${T("Đại chu thiên", "Greater")} · ${T("đã xong", "done")} ${fmt(can.daiCount)}`, can.dai, 100, T("Mỗi vòng tăng mạnh tinh thuần, đan điền và độ ổn định.", "Each cycle strongly raises purity, dantian and stability.")) : `<small>${T(`Đại chu thiên mở khi khai đủ 6 kinh mạch (hiện ${can.open}).`, `The Greater Circulation opens at 6 meridians (now ${can.open}).`)}</small>`}
+      </div>
+      <h3>${T("Dùng đan điều dưỡng", "Restorative pills")}</h3>
+      <div class="vk2-branch">${pills}</div>
+      <h3>${T("Thể chất", "Body")}</h3>
+      ${bodyCard(c)}
+      <h3>${T("Đạo cơ và Kim Đan", "Foundation and core")}</h3>
+      <div class="vk2-t-grid">${forgeCard(c, "dao")}${forgeCard(c, "dan")}</div>`;
+  }
+
   // ---------- Tab Hành trình ----------
 
   const realmLabel = (realm, layer) => {
@@ -287,6 +388,7 @@
 
   function journeyHtml(c, a, now) {
     const j = C.journey(c, a, now);
+    const can = K.ensure(c, a);
     const lean = { chinh: T("Chính đạo", "Righteous"), ta: T("Tà đạo", "Evil"), trung: T("Trung lập", "Neutral") }[j.lean];
     const facts = [
       [T("Cảnh giới", "Realm"), realmLabel(c.realm ?? 0, c.layer)],
@@ -294,6 +396,8 @@
       [T("Đạo lộ", "Path"), c.path ? L(D.PATH_LABELS[c.path] ?? [c.path, c.path]) : T("Chưa chọn", "None yet")],
       [T("Đạo tâm", "Dao Heart"), `${lean} (${c.daoTam ?? 0})`],
       [T("Linh căn", "Root"), `${c.linhCan ?? ""} · ${L(C.rootInfo(c).form.n)}`],
+      [T("Thể chất", "Body"), L(K.bodyOf(c).n)],
+      [T("Kinh mạch", "Meridians"), `${can.open}/${K.meridianCap(c)}`],
       [T("Trận thắng", "Wins"), fmt(j.kills)],
     ];
     const active = c.vk2.active.map((id) => `${L(C.talentDef.get(id).n)} ${T("bậc", "rank")} ${c.vk2.talents[id].lv}`);
@@ -338,7 +442,7 @@
           ? `<ul class="vk2-lives">${past
               .map((h) => {
                 const tal = (h.talents ?? []).map(([id, lv]) => `${L(C.talentDef.get(id)?.n ?? [id, id])} ${lv}`).join(", ");
-                return `<li><b>${T("Kiếp", "Life")} ${h.life}: ${esc(h.name)}</b><br>${esc(realmLabel(h.realm, h.layer))} · ${h.age} ${T("tuổi", "yrs")}${h.path ? ` · ${esc(L(D.PATH_LABELS[h.path] ?? [h.path, h.path]))}` : ""}${h.cause ? `<br><small>${esc(h.cause)}</small>` : ""}${tal ? `<br><small>${T("Thiên phú", "Talents")}: ${esc(tal)}</small>` : ""}</li>`;
+                return `<li><b>${T("Kiếp", "Life")} ${h.life}: ${esc(h.name)}</b><br>${esc(realmLabel(h.realm, h.layer))} · ${h.age} ${T("tuổi", "yrs")}${h.path ? ` · ${esc(L(D.PATH_LABELS[h.path] ?? [h.path, h.path]))}` : ""}${h.cause ? `<br><small>${esc(h.cause)}</small>` : ""}${tal ? `<br><small>${T("Thiên phú", "Talents")}: ${esc(tal)}</small>` : ""}${h.can ? `<br><small>${esc(pastCanText(h.can))}</small>` : ""}</li>`;
               })
               .join("")}</ul>`
           : `<p class="vk2-note">${T("Chưa có kiếp nào được ghi lại.", "No lives recorded yet.")}</p>`
@@ -349,8 +453,8 @@
 
   function modalHtml(c, a, now) {
     const tab = modal.tab;
-    const tabs = [["journey", T("Hành trình", "Journey")], ["quests", T("Nhiệm vụ", "Quests")], ["talents", T("Thiên phú", "Talents")], ["root", T("Linh căn", "Root")]];
-    const body = tab === "journey" ? journeyHtml(c, a, now) : tab === "talents" ? talentsHtml(c, a) : tab === "root" ? rootHtml(c) : journalHtml(c, a, now);
+    const tabs = [["journey", T("Hành trình", "Journey")], ["quests", T("Nhiệm vụ", "Quests")], ["can", T("Căn Cơ", "Base")], ["talents", T("Thiên phú", "Talents")], ["root", T("Linh căn", "Root")]];
+    const body = tab === "journey" ? journeyHtml(c, a, now) : tab === "can" ? canHtml(c, a) : tab === "talents" ? talentsHtml(c, a) : tab === "root" ? rootHtml(c) : journalHtml(c, a, now);
     return `<div class="vk2-sheet" role="dialog" aria-modal="true">
       <div class="vk2-sheet-head">
         <div class="vk2-tabs" role="tablist">${tabs.map(([k, n]) => `<button role="tab" aria-selected="${k === tab}" class="${k === tab ? "on" : ""}" data-act="tab" data-tab="${k}">${esc(n)}</button>`).join("")}</div>
@@ -423,6 +527,8 @@
     n.className = `vk2-toast ${kind ?? ""}`;
     n.textContent = text;
     box.appendChild(n);
+    // Ở tốc độ cao nhiều việc xảy ra cùng lúc. Nội dung vẫn nằm trong nhật ký, nên chỉ giữ vài thông báo mới nhất.
+    while (box.children.length > MAX_TOASTS) box.firstChild.remove();
     setTimeout(() => n.remove(), 3600);
   }
 
@@ -534,10 +640,37 @@
         C.chooseBranch(c, id, b.dataset.branch);
         commit();
         break;
+      case "method":
+        K.setMethod(c, a, id);
+        commit();
+        break;
+      case "forge": {
+        const done = K.forge(c, id, b.dataset.opt);
+        if (done) pushNotes(c, [K.forgeNote(id, done)]);
+        commit();
+        break;
+      }
+      case "remold":
+        if (K.remold(c, id)) toast(T("Căn cơ đã được cải tạo, nhưng thân thể phải trả giá.", "Your base has been remade, at a cost to your body."), "good");
+        commit();
+        break;
+      case "pill":
+        if (K.usePill(c, a, id)) toast(`${L(K.PILL_USES[id].n)}: ${L(K.PILL_USES[id].d)}`, "good");
+        commit();
+        break;
     }
   }
 
   // ---------- Vòng cập nhật ----------
+
+  /** Ghi chú căn cơ vào nhật ký gốc của game và báo cho người chơi. */
+  function pushNotes(c, notes) {
+    for (const n of notes ?? []) {
+      const text = L(n.t);
+      c.log?.push({ age: Math.floor(c.age ?? 0), tone: n.kind === "big" ? "big" : n.kind === "bad" ? "bad" : "good", text });
+      toast(text, n.kind === "big" ? "awake" : n.kind === "bad" ? "" : "good");
+    }
+  }
 
   function step() {
     try {
@@ -545,7 +678,8 @@
       if (!c) return render();
       const a = acct();
       const now = Date.now();
-      const { woken, died } = C.tick(c, a, now);
+      const { woken, died, notes } = C.tick(c, a, now);
+      pushNotes(c, notes);
       for (const id of woken) {
         const def = C.talentDef.get(id);
         toast(`${T("Thức tỉnh thiên phú", "Talent awakened")}: ${L(def.n)}`, "awake");
@@ -592,6 +726,12 @@
     captureRate(fn) {
       nM = fn;
     },
+    captureOmen(fn) {
+      K.captureOmen(fn);
+    },
+    onYear: safe((c, opts) => {
+      pushNotes(c, K.onYear(c, acct(), opts));
+    }),
     cultMul: safe((c) => {
       return C.cultMul(c);
     }, 1),
@@ -601,7 +741,7 @@
       C.onKill(c, acct());
     }),
     step,
-    _test: { acct, char, core: C, rate: (c) => (nM ? nM(c) : null) },
+    _test: { acct, char, core: C, can: K, game: () => bridge?.game ?? null, render: () => render(true), rate: (c) => (nM ? nM(c) : null) },
   };
 
   function boot() {
