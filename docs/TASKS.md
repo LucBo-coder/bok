@@ -128,3 +128,9 @@ Nếu sau này muốn phát hành online: cần nối lại repo gốc (mod dự
 - [x] GĐ1 Event Engine, GĐ2 Chuỗi, GĐ3 NPC và thế giới, GĐ4 Nhân quả và luân hồi, GĐ5 Nội dung, GĐ6 Giao diện và kiểm thử.
 - [x] 132 sự kiện đơn, 30 giai đoạn có lựa chọn, 22 chuỗi, 50 kết cục, 3 mạch đời NPC.
 - [ ] Cân bằng Tà đạo vẫn thấp hơn đối chứng, chưa xử lý.
+
+## Lớp đồ họa: có code, có test, chưa commit
+- [x] Trời theo giờ, thiên tượng, hạt theo trọng tâm, hào quang theo cảnh giới, hiệu ứng đột phá, khung sự kiện theo độ hiếm, tab Đồ Họa.
+- [ ] Đo tốc độ trên điện thoại thật.
+- [ ] Làm `e2e.js` và `lang.js` chịu được popup ngẫu nhiên của game.
+- [ ] Linh thú, trận chiến, màn đầu thai và màn chết chưa có hiệu ứng riêng.

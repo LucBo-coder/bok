@@ -467,7 +467,7 @@
 
   const TAB_NAMES = { journey: ["Hành Trình", "Journey"], can: ["Căn Cơ", "Base"], talents: ["Thiên phú", "Talents"], root: ["Linh căn", "Root"] };
   const GROUPS = [
-    { n: ["Hành trình", "Journey"], tabs: ["journey", "chronicle"] },
+    { n: ["Hành trình", "Journey"], tabs: ["journey", "chronicle", "gfx"] },
     { n: ["Nhiệm vụ", "Quests"], tabs: ["quests"] },
     { n: ["Tu luyện", "Practice"], tabs: ["can", "art", "talents", "root"] },
     { n: ["Cơ duyên", "Fortunes"], tabs: ["realm", "inherit"] },
@@ -793,7 +793,7 @@
     _test: { acct, char, core: C, can: K, game: () => bridge?.game ?? null, render: () => render(true), rate: (c) => (nM ? nM(c) : null), useAcct: (a) => (testAcct = a) },
     // Dành cho ui3.js: dùng chung cách vẽ và lưu, không có API thứ hai.
     _ui: {
-      EXT, L, T, esc, fmt, meter, toast, commit, pushNotes, closeModal: () => closeModalIfAny(), fxText, rewardText, FX_NAMES,
+      char, acct, EXT, L, T, esc, fmt, meter, toast, commit, pushNotes, closeModal: () => closeModalIfAny(), fxText, rewardText, FX_NAMES,
       /** Đưa ngay sự kiện kế tiếp của mod vào hàng đợi của game, ví dụ khi bấm vào bí cảnh trong bảng. */
       startChain(c, a) {
         const def = C.chainEvent(c, a);

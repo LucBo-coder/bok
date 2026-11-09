@@ -1,5 +1,31 @@
 # TEST REPORT
 
+## Lớp đồ họa (09/11/2026)
+
+`vk2/fx.js` và `vk2/gfx.css`, chỉ đọc trạng thái, không đổi dữ liệu chơi. Có ba mức Cao, Vừa, Tắt trong tab Đồ Họa.
+
+| Bộ test | Kết quả |
+|---|---|
+| Logic Node | 230/230 |
+| `gfx` local và tiền tố | 21/21, 21/21 |
+| `v3_e2e` local và tiền tố | 66/66, 66/66 |
+| `can_e2e`, `restart`, `pages` | 41/41, 7/7, 21/21 |
+| `mobile` local và tiền tố | 38/38, 38/38 |
+| `e2e`, `lang` local | 52/52, đạt khi chạy riêng lần hai |
+| `lang` tiền tố | Đạt |
+| `sim.js 100` | 0 vi phạm, 0 lỗi trang |
+
+Trong lượt chạy đầu, `e2e` và `lang` local dừng vì popup ngẫu nhiên của game (cảnh báo đồng đạo, truyện tranh chương 1) che nút mà test cần bấm. Đây là độ mong manh của test, chưa sửa. Chạy lại riêng từng bộ thì đạt.
+
+Lỗi tìm ra bằng cách xem ảnh chụp, không phải bằng test tự động:
+- Ánh chớp đột phá không tắt khi game tạm dừng, phủ trắng cả cảnh. Đã sửa và thêm test.
+- Ảnh nền mới của game che canvas phía sau. Đã sửa và thêm test.
+- Hạt linh khí chồng thành đốm sáng trước người nhân vật. Đã sửa, chỉ kiểm bằng mắt.
+
+Lỗi gameplay tìm ra khi làm đồ họa: hàm thiên tượng chỉ được nạp khi game tính đúc đạo cơ, nên sự kiện theo thiên tượng không chạy ở đầu đời. Nay nạp ở mỗi năm.
+
+Giới hạn: tốc độ 115 khung trong 4 giây chỉ đo trên máy này, chưa đo trên điện thoại thật. Chưa có người chơi đánh giá về thẩm mỹ.
+
 ## Hệ thống sự kiện động (09/11/2026)
 
 Nội dung: 132 sự kiện đơn, 30 giai đoạn có lựa chọn (tổng 162), 22 chuỗi, 50 kết cục, 12 nhóm, 5 cấp, 3 mạch đời NPC.

@@ -148,8 +148,10 @@ vk2/khi.js    luyện khí, phù lục, bản mệnh, động phủ
 vk2/the.js    NPC, sư đồ, tông môn, gia tộc, kẻ thù
 vk2/phap.js   tâm ma, pháp tắc, đại biến
 vk2/menh.js   Thiên Đạo, Thiên Mệnh, di sản xuyên kiếp
+vk2/su*.js    sự kiện động, chuỗi, mạch đời NPC, nhân quả
 vk2/ui.js     cầu nối game và giao diện
 vk2/ui3.js    các tab của bản 3.0
+vk2/fx.js     lớp đồ họa, chỉ đọc trạng thái (kèm vk2/gfx.css)
 vk2/guard.js  chặn mạng trong sandbox
 ```
 
@@ -163,3 +165,13 @@ Lỗi trong mod được bắt lại và trả giá trị trung tính, để kh�
 Thế giới có những cục diện lớn đi qua nhiều giai đoạn trong nhiều năm: Ma Tông tái xuất, Yêu Hoàng xuống núi, đại hạn, tranh linh mạch, người sửa Sổ Sinh Tử và nhiều chuyện khác. Bạn không tham gia thì chúng vẫn đi tới kết cục, và kết cục không cố định. Tham gia thì lựa chọn của bạn đổi được thế cuộc, và dấu vết còn lại ở những kiếp sau. Mục Thiên Hạ Ký Sự trong Hành Trình ghi các cục diện đang diễn ra, biến cố thế giới, nhân vật liên quan, lịch sử lựa chọn và nhân quả chưa giải.
 
 Sự kiện có 5 cấp: Thường, Hiếm, Sử Thi, Truyền Thuyết, Thiên Mệnh. Sự kiện ẩn không báo trước điều kiện.
+
+## Đồ họa
+Cảnh chơi có thêm một lớp vẽ giữ đúng nét pixel của game:
+- Bầu trời theo giờ trên máy: sáng, hoàng hôn, đêm có trăng và sao.
+- Thiên tượng hiện thành cảnh: Huyết Nguyệt có trăng đỏ, Lôi Vân có mưa và sét, Phật Quang có tia sáng.
+- Hạt theo trọng tâm năm: linh khí khi tu luyện, tàn lửa khi luyện đan, cánh hoa khi kết duyên.
+- Hào quang lớn dần theo cảnh giới, màu theo đạo lộ. Từ Kim Đan có đan quay quanh người, Nguyên Anh có vòng sáng, Hóa Thần có vòng dưới chân, Luyện Hư có cột sáng, Độ Kiếp có sét quanh thân.
+- Đột phá có chớp sáng, sóng xung kích và rung cảnh. Sự kiện đổi màu khung theo độ hiếm.
+
+Tab Đồ Họa trong Hành Trình có ba mức Cao, Vừa, Tắt. Điện thoại mặc định mức Vừa, máy chậm tự giảm số hạt, thiết bị bật giảm chuyển động thì cảnh vẽ tĩnh.

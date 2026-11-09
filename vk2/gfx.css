@@ -1,0 +1,81 @@
+/* Lớp đồ họa. Giữ nét pixel của game: viền cứng, bước màu rõ, chuyển động theo steps. Mọi quy tắc nằm dưới html.vk2g-on nên tắt là về đúng bản gốc. */
+
+/* ---------- Cảnh ---------- */
+.vk2g-layer, .vk2g-tint { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.vk2g-layer { image-rendering: pixelated; }
+.vk2g-tint { mix-blend-mode: multiply; opacity: 0; transition: opacity 1.2s, background-color 1.2s; }
+html.vk2g-on .scene::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(20, 12, 6, 0.38) 100%); }
+html.vk2g-on .scene.vk2g-dead .bg, html.vk2g-on .scene.vk2g-dead .sprite-wrap { filter: grayscale(0.85) brightness(0.8); transition: filter 1s; }
+html.vk2g-on .scene.vk2g-shake { animation: vk2g-shake 0.35s steps(6, end); }
+@keyframes vk2g-shake {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-4px, 2px); }
+  40% { transform: translate(4px, -2px); }
+  60% { transform: translate(-3px, -1px); }
+  80% { transform: translate(2px, 2px); }
+}
+
+/* ---------- Thanh trên ---------- */
+html.vk2g-on .topbar { background: linear-gradient(180deg, #4a3522 0%, var(--ink) 55%, var(--ink-dark) 100%); }
+html.vk2g-on .age-big { text-shadow: 2px 2px 0 var(--ink-dark), 0 0 8px rgba(255, 205, 110, 0.45); }
+html.vk2g-on .year-bar { box-shadow: inset 0 0 0 1px rgba(255, 220, 150, 0.2); }
+
+/* ---------- Thanh tu vi ---------- */
+html.vk2g-on .cult-fill { background: repeating-linear-gradient(90deg, #2f6b5a 0 6px, #3f8a72 6px 8px), linear-gradient(180deg, #5fb597, #2f6b5a); background-blend-mode: overlay; }
+html.vk2g-on .cult-fill::after { content: ""; position: absolute; top: 0; bottom: 0; right: 0; width: 3px; background: #d6fff0; box-shadow: 0 0 6px #8affd6; }
+html.vk2g-on .cult { box-shadow: inset 0 2px 0 rgba(59, 42, 26, 0.18); }
+
+/* ---------- Bảng và nhật ký ---------- */
+html.vk2g-on .panel > h2 { position: relative; padding-bottom: 5px; border-bottom: 2px solid var(--shadow); }
+html.vk2g-on .panel > h2::after { content: "◆"; position: absolute; right: 0; bottom: -9px; font-size: 12px; line-height: 1; color: var(--gold, #c9a13b); background: var(--paper); padding-left: 4px; }
+html.vk2g-on .log-item.big { background: linear-gradient(90deg, rgba(201, 161, 59, 0.2), transparent 70%); box-shadow: inset 3px 0 0 var(--gold, #c9a13b); padding-left: 5px; }
+
+/* ---------- Lựa chọn ---------- */
+html.vk2g-on .choice { box-shadow: inset 0 -3px 0 rgba(59, 42, 26, 0.16), 0 2px 0 var(--ink-dark); transition: transform 0.08s steps(2, end), filter 0.08s; }
+html.vk2g-on .choice:not(.off):hover { transform: translateY(-1px); filter: brightness(1.05); }
+html.vk2g-on .choice:not(.off):active { transform: translateY(2px); box-shadow: inset 0 2px 0 rgba(59, 42, 26, 0.22); }
+
+/* ---------- Khung sự kiện theo độ hiếm ---------- */
+html.vk2g-on .dialog.event { background: linear-gradient(180deg, #4a3522 0%, var(--ink) 40%, var(--ink-dark) 100%); }
+html.vk2g-on .dialog.event[data-vk2-tier="1"] { box-shadow: inset 0 0 0 2px #6fc48f, inset 0 0 0 5px var(--ink); }
+html.vk2g-on .dialog.event[data-vk2-tier="2"] { box-shadow: inset 0 0 0 2px #7fb2ff, inset 0 0 0 5px var(--ink), inset 0 0 22px rgba(90, 140, 255, 0.28); }
+html.vk2g-on .dialog.event[data-vk2-tier="3"] { box-shadow: inset 0 0 0 2px #d38bff, inset 0 0 0 5px var(--ink), inset 0 0 26px rgba(180, 90, 255, 0.34); animation: vk2g-pulse-3 2.4s steps(8, end) infinite; }
+html.vk2g-on .dialog.event[data-vk2-tier="4"] { box-shadow: inset 0 0 0 2px #ffc35a, inset 0 0 0 5px var(--ink), inset 0 0 32px rgba(255, 180, 60, 0.42); animation: vk2g-pulse-4 1.8s steps(8, end) infinite; }
+html.vk2g-on .dialog.event[data-vk2-tier="1"] h2 { color: #a6e8bf; }
+html.vk2g-on .dialog.event[data-vk2-tier="2"] h2 { color: #b6d2ff; text-shadow: 0 0 6px rgba(127, 178, 255, 0.6); }
+html.vk2g-on .dialog.event[data-vk2-tier="3"] h2 { color: #e8c2ff; text-shadow: 0 0 8px rgba(211, 139, 255, 0.7); }
+html.vk2g-on .dialog.event[data-vk2-tier="4"] h2 { color: #ffe08a; text-shadow: 0 0 10px rgba(255, 195, 90, 0.85); }
+@keyframes vk2g-pulse-3 {
+  50% { box-shadow: inset 0 0 0 2px #e8c2ff, inset 0 0 0 5px var(--ink), inset 0 0 38px rgba(200, 120, 255, 0.5); }
+}
+@keyframes vk2g-pulse-4 {
+  50% { box-shadow: inset 0 0 0 2px #ffe9a8, inset 0 0 0 5px var(--ink), inset 0 0 48px rgba(255, 200, 90, 0.65); }
+}
+
+/* ---------- Bảng của mod ---------- */
+html.vk2g-on .vk2-sheet { background: linear-gradient(180deg, var(--paper-3) 0, var(--paper) 90px); box-shadow: 6px 6px 0 var(--shadow), inset 0 0 0 2px rgba(201, 161, 59, 0.35); }
+html.vk2g-on .vk2-tabs button { box-shadow: inset 0 -2px 0 rgba(59, 42, 26, 0.18); }
+html.vk2g-on .vk2-tabs button.on { background: linear-gradient(180deg, #4a3522, var(--ink)); box-shadow: inset 0 -2px 0 var(--gold, #c9a13b); }
+html.vk2g-on .vk2-t { box-shadow: 2px 2px 0 rgba(59, 42, 26, 0.16); }
+html.vk2g-on .vk2-t.on { box-shadow: 2px 2px 0 rgba(59, 42, 26, 0.2), inset 0 0 0 1px rgba(201, 161, 59, 0.45); }
+html.vk2g-on .vk2-sheet-body h3 { border-left: 4px solid var(--gold, #c9a13b); padding-left: 7px; }
+html.vk2g-on .vk2-tier-2 { text-shadow: 0 0 5px rgba(90, 140, 255, 0.35); }
+html.vk2g-on .vk2-tier-3 { text-shadow: 0 0 5px rgba(180, 90, 255, 0.4); }
+html.vk2g-on .vk2-tier-4 { text-shadow: 0 0 6px rgba(255, 180, 60, 0.5); }
+
+/* ---------- Nền trang theo thiên tượng, chỉ thấy ở màn rộng ---------- */
+@media (min-width: 700px) {
+  html.vk2g-on body { transition: background-color 1.5s; }
+  html.vk2g-on[data-vk2-omen="huyet_nguyet"] body { background-color: #cda593; }
+  html.vk2g-on[data-vk2-omen="loi_van"] body { background-color: #b0b0b4; }
+  html.vk2g-on[data-vk2-omen="yeu_trieu"] body { background-color: #c7b3cc; }
+  html.vk2g-on[data-vk2-omen="linh_khi"] body { background-color: #d2e3bb; }
+  html.vk2g-on[data-vk2-omen="phat_quang"] body { background-color: #f0dc9c; }
+  html.vk2g-on[data-vk2-omen="cat_tinh"] body { background-color: #c9c2de; }
+  html.vk2g-on[data-vk2-omen="giang_ho_loan"] body { background-color: #cdb89a; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.vk2g-on .dialog.event[data-vk2-tier], html.vk2g-on .scene.vk2g-shake { animation: none; }
+  html.vk2g-on .choice { transition: none; }
+}

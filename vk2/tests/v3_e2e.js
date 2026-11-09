@@ -475,6 +475,8 @@ section(async function phaseSu(page) {
   check("sau khi tải lại vẫn thấy đúng lựa chọn", list.length > 0, list.slice(0, 60));
   seenPopup = await S(page, () => document.body.innerText);
   check("popup sự kiện có tên, độ hiếm và lựa chọn", /Đàn thú rời rừng/.test(seenPopup) && /Sử Thi/.test(seenPopup), seenPopup.slice(0, 80));
+  await sleep(700);
+  check("khung sự kiện đổi theo độ hiếm", (await S(page, () => document.querySelector(".dialog.event")?.dataset.vk2Tier)) === "2");
   await page.screenshot({ path: path.join(OUT, "v3-su-event.png") });
   // Bấm thật, chờ qua trạng thái khóa của game, và hậu quả chỉ tính một lần
   const before = await state();

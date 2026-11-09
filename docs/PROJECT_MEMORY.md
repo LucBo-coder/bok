@@ -84,3 +84,10 @@ Pages đang ở chế độ deploy từ gốc nhánh `main`, nên bản dựng �
 - `acct.mv` và `acct.lore` chỉ được đồng bộ trong game thật (`syncMeta`), mô phỏng trình duyệt không có. Vì vậy sự kiện theo Phúc duyên, Nghiệp, Kiếp Số, kết cục, Thiên thư được kiểm ở `su.test.js`.
 - Thiên tượng theo ngày thật, nên một lượt `sim.js` chỉ gặp thiên tượng của hôm đó.
 - Tài khoản giờ được lưu cả khi `pagehide`, cùng lúc game lưu nhân vật. Trước đó có thể lệch tới 5 giây.
+
+## Lớp đồ họa (`vk2/fx.js`, `vk2/gfx.css`)
+- Hai canvas độ phân giải 1/3 chèn vào `.scene`. `mount()` giữ canvas sau ngay trước `.sprite-wrap` và canvas trước ở cuối, vì game chèn ảnh nền mới khi đổi cảnh.
+- `VK2Fx.debug` ghi đè `hour, omen, focus, realm, path, cosmos, atm` để chụp ảnh từng cảnh. `vk2/tests/gfx.js` xuất ảnh, và phải xem ảnh bằng mắt: test tự động không phát hiện được cảnh bị bạc màu.
+- Khung sprite cao hơn nhân vật: đầu khoảng 36%, chân khoảng 83% chiều cao khung.
+- Mọi CSS nằm dưới `html.vk2g-on`, nên mức Tắt trả về đúng hình gốc.
+- Trong khi đồ họa bật, `VK2Can.omenIs` có dữ liệu từ năm đầu tiên nhờ điểm vá `nP`.

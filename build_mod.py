@@ -34,7 +34,7 @@ PATCHES = {
         # Bản gốc đổi tên thành nP0. Năm không có kỳ ngộ của game thì mod được phép đưa sự kiện của mình vào.
         (
             "function nP(n,l){var",
-            f"function nP(n,l){{{HOOK}&&{HOOK}.onYear(n,arguments[2]);var __r=nP0.apply(this,arguments);"
+            f"function nP(n,l){{{HOOK}&&({HOOK}.captureOmen(r.w),{HOOK}.onYear(n,arguments[2]));var __r=nP0.apply(this,arguments);"
             f"return __r||n.dead||!{HOOK}?__r:{HOOK}.yearEvent(n,arguments[2],nD)}}function nP0(n,l){{var",
         ),
         # Tra định nghĩa sự kiện theo id: thêm sự kiện của mod, vẫn lưu và khôi phục được như sự kiện gốc
@@ -129,12 +129,14 @@ def head_tags(base):
 def game_tags(base):
     return (
         f'<link rel="stylesheet" href="{base}/vk2/vk2.css"/>'
+        f'<link rel="stylesheet" href="{base}/vk2/gfx.css"/>'
         f'<script src="{base}/vk2/data.js"></script>'
         f'<script src="{base}/vk2/core.js"></script>'
         f'<script src="{base}/vk2/can.js"></script>'
         + "".join(f'<script src="{base}/vk2/{m}.js"></script>' for m in MODULES)
         + f'<script src="{base}/vk2/ui.js"></script>'
         f'<script src="{base}/vk2/ui3.js"></script>'
+        f'<script src="{base}/vk2/fx.js"></script>'
     )
 
 

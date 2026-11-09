@@ -461,6 +461,7 @@
     omen = fn;
   };
   const omenIs = (id) => !!omen?.(id);
+  const omenReady = () => !!omen;
 
   /** Thiên tượng hôm nay giúp hay cản việc đúc. */
   function skyBonus(c) {
@@ -626,6 +627,6 @@
   root.VK2Can = {
     METHODS, MERIDIANS, GRADES, DAO_CO, KIM_DAN, FORGE_KINDS, FORGE_OPTS, BODIES, BODY_PHAM, STAGES, QUESTS, PILL_USES, PENDING_YEARS,
     bodyDef, bodyOf, hasFate, stageOf, meridianCap, dantianCap, openCost, birthBody, ensure, checkBody, canAwakenBody, metric, fx, cultFactor, insight,
-    onBump, onYear, tick, captureOmen, omenIs, forgeBase, forgeOptions, forge, forgeNote, gradeOf, canRemold, remold, setMethod, usePill, summary,
+    onBump, onYear, tick, captureOmen, omenIs, omenReady, forgeBase, forgeOptions, forge, forgeNote, gradeOf, canRemold, remold, setMethod, usePill, summary,
   };
 })(typeof globalThis !== "undefined" ? globalThis : this);
