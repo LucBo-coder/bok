@@ -1,5 +1,36 @@
 # TEST REPORT
 
+## Đồ họa đợt 2 và độ bền của test (09/11/2026)
+
+Thêm hiệu ứng cho trận chiến, linh thú, màn chết, màn đầu thai. Thêm `vk2/tests/popups.js` để test Playwright tự dọn popup ngẫu nhiên.
+
+| Bộ test | Kết quả |
+|---|---|
+| Logic Node | 230/230 |
+| `gfx` local và tiền tố | 56/56, 56/56 |
+| `v3_e2e` local và tiền tố | 66/66, 66/66 |
+| `e2e` | 52/52, lặp thêm 5 lần đều đạt |
+| `can_e2e`, `restart`, `pages` | 41/41, 7/7, 21/21 |
+| `mobile` local và tiền tố | 38/38, 38/38 |
+| `lang` local và tiền tố | Đạt, local lặp thêm 3 lần đều đạt |
+| `sim.js 100` | 1200 kiếp, 0 vi phạm, 0 lỗi trang |
+
+Trước khi sửa, `e2e` chỉ đạt 2 trong 5 lần chạy liên tiếp. Nguyên nhân đều nằm ở test:
+- `offsetParent` của popup `position: fixed` luôn là null, nên `calm()` không thấy popup đang mở.
+- Thương nhân lưu động và thiên kiếp chưa được dọn.
+- Nút "Phó mặc số trời" nghe `pointerdown`, nên `.click()` từ JS không có tác dụng.
+- Quái giết nhân vật thật trong trận thử. `e2e` nay chơi lại từ đầu như `v3_e2e`, nên kết quả là của lượt cuối cùng.
+
+Lỗi tìm ra bằng cách xem ảnh chụp:
+- Nền màn đầu thai vẫn màu cũ: `body` che canvas `z-index: -1`, và màu thiên tượng thắng màu nền. Đã sửa.
+- Trên điện thoại cao tới 700px, quy tắc thu cảnh còn 112px áp dụng cả khi đang đánh, làm thanh máu và chữ sát thương chồng nhau. Nay bỏ qua khi đang đánh. Quy tắc này nằm trong `vk2.css`, nên có tác dụng cả khi tắt đồ họa.
+
+Giới hạn:
+- Thanh máu thấp được kiểm bằng cách đặt độ rộng thanh máu trên DOM, không phải bằng một trận thua thật.
+- Linh thú được gắn trực tiếp vào nhân vật trong test. Linh thú bay và linh thú huyền thoại chưa được chụp ảnh để xem.
+- Trên điện thoại, các bảng che gần hết bánh xe luân hồi và hồn bay, nên chúng chủ yếu thấy ở màn rộng.
+- Chưa đo trên điện thoại thật. Chưa có người chơi đánh giá về thẩm mỹ.
+
 ## Lớp đồ họa (09/11/2026)
 
 `vk2/fx.js` và `vk2/gfx.css`, chỉ đọc trạng thái, không đổi dữ liệu chơi. Có ba mức Cao, Vừa, Tắt trong tab Đồ Họa.

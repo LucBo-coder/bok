@@ -129,8 +129,11 @@ Nếu sau này muốn phát hành online: cần nối lại repo gốc (mod dự
 - [x] 132 sự kiện đơn, 30 giai đoạn có lựa chọn, 22 chuỗi, 50 kết cục, 3 mạch đời NPC.
 - [ ] Cân bằng Tà đạo vẫn thấp hơn đối chứng, chưa xử lý.
 
-## Lớp đồ họa: có code, có test, chưa commit
+## Lớp đồ họa
 - [x] Trời theo giờ, thiên tượng, hạt theo trọng tâm, hào quang theo cảnh giới, hiệu ứng đột phá, khung sự kiện theo độ hiếm, tab Đồ Họa.
+- [x] Trận chiến: tia va chạm, nổ khi quái chết, rung khi bạo kích, viền đỏ khi máu dưới 25%.
+- [x] Linh thú: bóng dưới chân, đốm lấp lánh, viền sáng.
+- [x] Màn chết: hồn bay phía sau tờ giấy, nền tối. Màn đầu thai: trời sao, bánh xe luân hồi, quầng sáng khi vào đời.
+- [x] `vk2/tests/popups.js`: mọi test Playwright tự dọn cảnh báo đồng đạo, truyện tranh và thương nhân lưu động.
 - [ ] Đo tốc độ trên điện thoại thật.
-- [ ] Làm `e2e.js` và `lang.js` chịu được popup ngẫu nhiên của game.
-- [ ] Linh thú, trận chiến, màn đầu thai và màn chết chưa có hiệu ứng riêng.
+- [ ] Người chơi thật đánh giá về thẩm mỹ.

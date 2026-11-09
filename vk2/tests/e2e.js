@@ -2,6 +2,7 @@
 // Dùng: NODE_PATH=<thư mục có playwright-core> node vk2/tests/e2e.js [thư-mục-ảnh]
 const { chromium } = require("playwright-core");
 const path = require("node:path");
+const { guard } = require("./popups");
 
 const BASE = process.env.VK2_URL || "http://127.0.0.1:8766";
 const OUT = process.argv[2] || ".";
@@ -21,7 +22,14 @@ async function clearBlockers(page) {
       comic.click();
       return "comic";
     }
-    const hint = [...document.querySelectorAll("button")].find((b) => /Đã hiểu/.test(b.textContent) && visible(b));
+    // Thiên kiếp giữ thời gian đứng yên tới khi được giải quyết. Nút phó mặc nghe pointerdown, không nghe click.
+    const fate = [...document.querySelectorAll(".kiep button")].filter(visible).pop();
+    if (fate) {
+      if (fate.classList.contains("kiep-skip")) fate.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true }));
+      else fate.click();
+      return "kiep";
+    }
+    const hint = [...document.querySelectorAll("button")].find((b) => /Đã hiểu|Chào lão/.test(b.textContent) && visible(b));
     if (hint) {
       hint.click();
       return "hint";
@@ -57,10 +65,11 @@ async function clearBlockers(page) {
 async function calm(page) {
   const busy = () =>
     page.evaluate(() => {
-      const dialog = [...document.querySelectorAll('[role="dialog"]')].some((d) => d.offsetParent !== null && !d.closest("#vk2-modal"));
+      // offsetParent của popup position: fixed luôn là null, nên phải xét getClientRects
+      const dialog = [...document.querySelectorAll('[role="dialog"]')].some((d) => d.getClientRects().length > 0 && !d.closest("#vk2-modal"));
       return dialog || !!document.querySelector(".game.has-event, .cn-wrap, .coach");
     });
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < 200; i++) { // Một trận đánh cũng tính là đang bận, và trận dài có thể mất cả phút
     if (!(await busy())) {
       await page.evaluate(() => [...document.querySelectorAll("button")].find((x) => x.textContent.trim() === "❚❚")?.click());
       await sleep(350);
@@ -69,7 +78,9 @@ async function calm(page) {
     await clearBlockers(page);
     await sleep(300);
   }
-  throw new Error("Không dọn được popup của game");
+  const what = await page.evaluate(() => [...document.querySelectorAll('[role="dialog"], .game.has-event, .cn-wrap, .coach')].filter((d) => d.getClientRects().length > 0 && !d.closest("#vk2-modal")).map((d) => `${d.className}: ${[...d.querySelectorAll("button")].map((b) => b.textContent.trim().slice(0, 20)).slice(0, 8).join("|")}`).join(" ; ").slice(0, 600));
+  await page.screenshot({ path: path.join(OUT, "e2e-blocked.png") });
+  throw new Error(`Không dọn được popup của game: ${what}`);
 }
 
 async function setSpeed(page, label) {
@@ -113,10 +124,12 @@ async function enterGame(page) {
   return false;
 }
 
-(async () => {
-  const browser = await chromium.launch({ channel: "msedge", headless: true });
+let browser = null;
+async function attempt() {
+  browser = await chromium.launch({ channel: "msedge", headless: true });
   const ctx = await browser.newContext({ viewport: { width: 1100, height: 900 } });
   const page = await ctx.newPage();
+  await guard(page);
   // Các kiểm thử nhận thưởng cần danh sách nhiệm vụ đang mở; trạng thái mặc định được kiểm ở phần mobile.
   await page.addInitScript(() => {
     if (!sessionStorage.getItem("vk2.test.open")) {
@@ -252,17 +265,25 @@ async function enterGame(page) {
     await sleep(300);
   }
   await S(() => globalThis.__VK2._test.char() && document.querySelector("#vk2-hud") && 1);
-  await page.evaluate(() => {
-    const go = [...document.querySelectorAll("button")].find((b) => /Trừ yêu|Săn/i.test(b.textContent) && b.offsetParent !== null);
-    if (go) go.click();
-  });
-  await sleep(500);
-  const hunted = await page.evaluate(() => {
-    const it = document.querySelector(".hunt-item");
-    if (!it) return false;
-    (it.querySelector("button") ?? it).click();
-    return true;
-  });
+  // Popup ngẫu nhiên có thể bật lên đúng lúc này và đóng mất bảng săn, nên thử lại như người chơi bấm lần nữa
+  let hunted = false;
+  for (let i = 0; i < 10 && !hunted; i++) {
+    await page.evaluate(() => {
+      const go = [...document.querySelectorAll("button")].find((b) => /Trừ yêu|Săn/i.test(b.textContent) && b.offsetParent !== null);
+      if (go) go.click();
+    });
+    await sleep(500);
+    hunted = await page.evaluate(() => {
+      const it = document.querySelector(".hunt-item");
+      if (!it) return false;
+      (it.querySelector("button") ?? it).click();
+      return true;
+    });
+    if (!hunted) {
+      await clearBlockers(page);
+      await sleep(400);
+    }
+  }
   check("mở được bảng săn quái của game", hunted);
   let killsNow = killsBefore;
   for (let i = 0; i < 250 && killsNow < killsBefore + 3; i++) {
@@ -573,10 +594,26 @@ async function enterGame(page) {
   check("không có lỗi JS và cảnh báo VK2", errors.length === 0, errors.slice(0, 3).join(" | ").slice(0, 300));
 
   await browser.close();
+}
+
+// Quái có thể giết nhân vật thật trong trận thử. Khi đó game sang màn đầu thai, nên chơi lại từ đầu thay vì báo nhầm là lỗi.
+(async () => {
+  for (let i = 1; i <= 4; i++) {
+    results.length = 0;
+    try {
+      await attempt();
+      break;
+    } catch (e) {
+      await browser?.close().catch(() => {});
+      if (!/of null/.test(String(e.message)) || i === 4) throw e;
+      console.log(`\n--- Lượt ${i} dừng vì nhân vật chết giữa chừng (${String(e.message).split("\n")[0].slice(0, 100)}), chơi lại`);
+    }
+  }
   const failed = results.filter((r) => !r[1]);
   console.log(`\n${results.length - failed.length}/${results.length} đạt`);
   process.exit(failed.length ? 1 : 0);
 })().catch((e) => {
   console.error(e);
+  console.log("\nTest dừng giữa chừng, KHÔNG có kết quả.");
   process.exit(2);
 });

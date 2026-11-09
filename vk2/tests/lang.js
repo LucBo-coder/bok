@@ -1,6 +1,7 @@
 // Đổi ngôn ngữ trên site tĩnh: trang không được tải lại liên tục, chữ phải đổi, game vẫn chơi được.
 // Dùng: VK2_URL=http://127.0.0.1:8766 NODE_PATH=<thư mục có playwright-core> node vk2/tests/lang.js
 const { chromium } = require("playwright-core");
+const { guard } = require("./popups");
 
 const BASE = (process.env.VK2_URL || "http://127.0.0.1:8766").replace(/\/$/, "");
 const SETTLE_MS = 3000;
@@ -18,6 +19,7 @@ const realErrors = (errs) => errs.filter((e) => !/Minified React error #418/.tes
 async function open(browser, url, lang) {
   const ctx = await browser.newContext({ viewport: { width: 1000, height: 900 } });
   const page = await ctx.newPage();
+  await guard(page);
   const track = { loads: 0, errs: [] };
   page.on("framenavigated", (f) => {
     if (f === page.mainFrame()) track.loads++;
@@ -99,7 +101,10 @@ async function enterGame(page) {
       await page.evaluate(() => {
         const vis = (b) => b.offsetParent !== null && !b.disabled;
         const btns = [...document.querySelectorAll("button")].filter(vis);
-        const dismiss = btns.find((b) => /^(Got it|Continue|Next|Close|Skip)$/i.test(b.textContent.trim()));
+        const popup = [...document.querySelectorAll(".duel-warn .duel-actions button")].pop() ?? document.querySelector(".cn-wrap .cn-skip") ?? [...document.querySelectorAll(".kiep button")].pop();
+        if (popup?.classList.contains("kiep-skip")) return popup.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true })); // Nút phó mặc nghe pointerdown, không nghe click
+        if (popup) return popup.click();
+        const dismiss = btns.find((b) => /^(Got it|Continue|Next|Close|Skip|Bid farewell and move on)$/i.test(b.textContent.trim()));
         if (dismiss) return dismiss.click();
         const pick = [...document.querySelectorAll(".choices .choice")].filter((b) => vis(b) && !b.classList.contains("off")).pop();
         if (pick) return pick.click();

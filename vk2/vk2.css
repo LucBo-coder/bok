@@ -123,10 +123,10 @@
   #vk2-hud .vk2-hud-toggle { pointer-events: none; text-align: center; padding: 2px 0; min-height: 0; flex: none; }
   .vk2-hud-toggle > span, .vk2-hud-next { display: none; }
 }
-/* Điện thoại thấp: khung cảnh nhường chỗ để nhật ký đọc được nhiều dòng hơn. Không áp dụng lúc có sự kiện. */
+/* Điện thoại thấp: khung cảnh nhường chỗ để nhật ký đọc được nhiều dòng hơn. Không áp dụng lúc có sự kiện hoặc đang đánh, vì thanh máu và chữ sát thương cần chỗ. */
 @media (max-width: 480px) and (max-height: 700px) {
-  html .game:not(.has-event) .stage > .scene { height: 112px; min-height: 104px; }
-  html .game:not(.has-event) .sprite-wrap .sprite { width: 104px; height: 104px; }
+  html .game:not(.has-event) .stage > .scene:not(.in-battle) { height: 112px; min-height: 104px; }
+  html .game:not(.has-event) .scene:not(.in-battle) .sprite-wrap .sprite { width: 104px; height: 104px; }
 }
 @media (max-width: 480px) {
   .vk2-modal { padding: 0; }

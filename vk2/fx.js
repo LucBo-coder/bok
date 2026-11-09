@@ -56,7 +56,13 @@
   const stars = [];
   const st = { realm: 0, layer: 0, life: -1, tier: null, rid: null, focus: "", omen: null, night: false, hour: 12, dead: false, cosmos: null, color: "#ffffff", atm: null, sprite: null };
   const debug = {};
-  const stats = { frames: 0, fps: 0, shocks: 0, drawn: 0, errors: 0 };
+  const stats = { frames: 0, fps: 0, shocks: 0, drawn: 0, errors: 0, hits: 0, kills: 0, pets: 0, born: 0, mode: null };
+  const sparks = [];
+  let foe = null;
+  let foeDead = false;
+  let pets = [];
+  let shakeAt = 0;
+  let wasBirth = false;
 
   const rnd = (a, b) => a + Math.random() * (b - a);
   const amount = () => LEVELS[level] * auto;
@@ -100,6 +106,8 @@
     st.omen = readOmen();
     st.atm = readAtmosphere();
     readEvent(c);
+    pets = [...scene.querySelectorAll(".pet-roam")];
+    stats.pets = pets.length;
     applyTint();
   }
   /** Khung sự kiện theo độ hiếm. Sự kiện gốc của game không có cấp nên giữ khung gốc. */
@@ -121,6 +129,7 @@
   }
   function applyTint() {
     if (!tint) return;
+    scene?.classList.toggle("vk2g-dead", st.dead); // Game đổi className của cảnh thì lớp của ta mất, nên đặt lại mỗi lượt đọc
     const omen = OMEN_TINT[st.omen];
     const time = st.cosmos || st.dead ? null : st.night ? ["#2b3a7a", 0.56] : st.hour < 7 ? ["#ffae85", 0.24] : st.hour >= 17 ? ["#ff8a55", 0.3] : null;
     const pick = st.atm === "ma" ? ["#7a1a2a", 0.4] : omen ?? time;
@@ -129,13 +138,13 @@
     tintKey = key;
     tint.style.backgroundColor = pick?.[0] ?? "transparent";
     tint.style.opacity = pick ? pick[1] : 0;
-    scene?.classList.toggle("vk2g-dead", st.dead);
     document.documentElement.dataset.vk2Omen = st.atm === "ma" ? "huyet_nguyet" : st.omen ?? "";
   }
 
   // ---------- Hiệu ứng một lần ----------
 
   function burst(x, y, n, color, speed = 34) {
+    if (reduced()) return; // Hạt đứng yên khi giảm chuyển động, sinh ra sẽ kẹt trên cảnh
     const count = Math.round(n * Math.max(0.5, amount()));
     for (let i = 0; i < count && parts.length < MAX_PARTICLES; i++) {
       const a = rnd(0, Math.PI * 2);
@@ -153,9 +162,88 @@
       flash = 0.75;
       flashColor = "#fff6d8";
       burst(x, y - 10, 36, st.color, 60);
-      scene?.classList.add("vk2g-shake");
-      setTimeout(() => scene?.classList.remove("vk2g-shake"), 350);
+      shake();
     } else burst(x, y - 10, 10, st.color, 26);
+  }
+  function shake() {
+    const now = performance.now();
+    if (now - shakeAt < 500) return; // Ở tốc độ cao đòn đến dồn dập, rung liên tục sẽ rất khó chịu
+    shakeAt = now;
+    scene?.classList.add("vk2g-shake");
+    setTimeout(() => scene?.classList.remove("vk2g-shake"), 350);
+  }
+
+  // ---------- Trận chiến ----------
+
+  const seenDmg = new WeakMap();
+  /** Tọa độ của một phần tử trên canvas. */
+  function toCanvas(el) {
+    const a = el.getBoundingClientRect();
+    const b = scene.getBoundingClientRect();
+    return { x: (a.left - b.left + a.width / 2) / PIXEL, y: (a.top - b.top + a.height / 2) / PIXEL, foot: (a.bottom - b.top) / PIXEL, w: a.width / PIXEL };
+  }
+  function impact(x, y, color, crit) {
+    stats.hits++;
+    if (amount() <= 0 || reduced()) return;
+    if (sparks.length < 12) sparks.push({ x, y, life: 0, max: crit ? 0.26 : 0.16, r: crit ? 13 : 7, c: color });
+    burst(x, y, crit ? 14 : 5, color, crit ? 58 : 36);
+    if (crit) shake();
+  }
+  /** Game hiện số sát thương bằng .dmg: bên "p" là đòn của người chơi, trúng quái; bên "m" là đòn của quái, trúng người chơi. */
+  function readBattle() {
+    const box = scene.querySelector(".battle");
+    st.battle = !!box;
+    scene.classList.toggle("vk2g-battle", st.battle);
+    if (!box) {
+      foe = null;
+      foeDead = false;
+      scene.classList.remove("vk2g-low");
+      return;
+    }
+    const wrap = box.querySelector(".mon-wrap");
+    foe = wrap ? toCanvas(wrap) : null;
+    for (const d of box.querySelectorAll(".dmg")) {
+      const text = d.firstChild?.textContent ?? "";
+      if (seenDmg.get(d) === text) continue;
+      seenDmg.set(d, text);
+      if (!/^-\d/.test(text)) continue; // Né, kháng và các chữ khác không phải một cú va chạm
+      const crit = d.classList.contains("crit");
+      if (d.classList.contains("p")) {
+        if (foe) impact(foe.x, foe.y, crit ? "#fff0a8" : "#ffd866", crit);
+      } else if (st.sprite) impact(st.sprite.x, st.sprite.y - st.sprite.h / 2, "#ff6a55", crit);
+    }
+    const dead = !!box.querySelector(".beast-foe.dead, .mon-dead, .mon-dead-lpc");
+    if (dead && !foeDead && foe) {
+      stats.kills++;
+      if (amount() > 0 && !reduced()) {
+        rings.push({ x: foe.x, y: foe.foot - 8, r: 2, v: 70, life: 0, max: 0.5, c: "#ffe9a8" });
+        burst(foe.x, foe.y, 26, "#ff9a4a", 52);
+        burst(foe.x, foe.y, 10, "#fff0c0", 30);
+        shake();
+      }
+    }
+    foeDead = dead;
+    const hp = parseFloat(box.querySelector(".hpbox.p .hpbar > div")?.style.width);
+    scene.classList.toggle("vk2g-low", hp > 0 && hp < 25);
+  }
+
+  // ---------- Linh thú ----------
+
+  let petDebt = 0;
+  function drawPets(g, live, dt) {
+    if (!pets.length) return;
+    petDebt += live ? pets.length * 2.5 * amount() * dt : 0;
+    const spawn = petDebt >= 1;
+    if (spawn) petDebt -= 1;
+    const pick = spawn ? Math.floor(rnd(0, pets.length)) : -1;
+    pets.forEach((el, i) => {
+      if (!el.isConnected) return;
+      const p = toCanvas(el);
+      const fly = el.classList.contains("fly");
+      // Linh thú bay thì bóng nằm dưới đất và nhỏ lại, nhìn ra độ cao
+      shadow(g, p.x, fly && st.sprite ? st.sprite.y : p.foot - 1, Math.max(3, p.w * (fly ? 0.22 : 0.36)));
+      if (i === pick) add({ x: p.x + rnd(-p.w / 2, p.w / 2), y: p.foot - rnd(0, p.w), vx: 0, vy: -5, max: 0.8, c: el.classList.contains("legend") ? "#ffd866" : "#fff6d0", twinkle: 1 });
+    });
   }
 
   // ---------- Hạt theo trọng tâm và thiên tượng ----------
@@ -207,7 +295,7 @@
   function emit(dt) {
     const a = amount();
     const realmBoost = 1 + Math.min(1.5, st.realm * 0.18);
-    debt += (rates[st.focus] ?? 3) * a * realmBoost * dt;
+    debt += (rates[st.focus] ?? 3) * a * realmBoost * (st.battle ? 0.3 : 1) * dt; // Trong trận, tia va chạm mới là thứ cần nhìn
     while (debt >= 1) {
       debt -= 1;
       (EMIT[st.focus] ?? EMIT.tu_luyen)();
@@ -328,15 +416,20 @@
     g.globalCompositeOperation = "source-over";
     g.globalAlpha = 1;
   }
-  function drawAura(g) {
-    if (!st.sprite || st.dead) return;
-    const { x, y, h } = st.sprite;
-    // Bóng dưới chân để nhân vật đứng vững trên nền
+  /** Bóng dưới chân để nhân vật đứng vững trên nền. */
+  function shadow(g, x, y, rx) {
     g.globalAlpha = 0.28;
     g.fillStyle = "#1f160d";
     g.beginPath();
-    g.ellipse(x, y, 9, 2, 0, 0, Math.PI * 2);
+    g.ellipse(x, y, rx, 2, 0, 0, Math.PI * 2);
     g.fill();
+    g.globalAlpha = 1;
+  }
+  function drawAura(g) {
+    if (foe && !foeDead) shadow(g, foe.x, foe.foot - 1, Math.max(8, foe.w * 0.34));
+    if (!st.sprite || st.dead) return;
+    const { x, y, h } = st.sprite;
+    shadow(g, x, y, 9);
     const r = st.realm;
     if (r < 1 && !st.cosmos) return;
     const cy = y - h / 2;
@@ -412,6 +505,10 @@
   /** Ánh chớp tắt theo thời gian thật, kể cả khi game tạm dừng, nếu không cả cảnh sẽ bị phủ trắng. */
   function stepLight(dt) {
     flash = Math.max(0, flash - dt * 2.2);
+    for (let i = sparks.length - 1; i >= 0; i--) {
+      sparks[i].life += dt;
+      if (sparks[i].life >= sparks[i].max) sparks.splice(i, 1);
+    }
     if (bolt) {
       bolt.life += dt;
       if (bolt.life > 0.22) bolt = null;
@@ -438,6 +535,24 @@
       g.ellipse(r.x, r.y, r.r, r.r * 0.72, 0, 0, Math.PI * 2);
       g.stroke();
     }
+    // Tia va chạm: dấu chữ thập cứng như hiệu ứng trong game pixel, co lại rất nhanh
+    for (const s of sparks) {
+      const k = 1 - s.life / s.max;
+      const x = Math.round(s.x);
+      const y = Math.round(s.y);
+      const r = Math.max(1, Math.round(s.r * k));
+      g.globalAlpha = 1;
+      g.fillStyle = s.c;
+      g.fillRect(x - r, y, r * 2 + 1, 1);
+      g.fillRect(x, y - r, 1, r * 2 + 1);
+      const d = Math.round(r * 0.55);
+      g.fillRect(x - d, y - d, 1, 1);
+      g.fillRect(x + d, y - d, 1, 1);
+      g.fillRect(x - d, y + d, 1, 1);
+      g.fillRect(x + d, y + d, 1, 1);
+      g.fillStyle = "#ffffff";
+      g.fillRect(x - 1, y - 1, 3, 3);
+    }
     if (bolt) {
       g.globalAlpha = 1;
       g.strokeStyle = "#ffffff";
@@ -459,13 +574,135 @@
   function remove() {
     for (const el of [back, front, tint]) el?.remove();
     back = front = tint = null;
-    scene?.classList.remove("vk2g-dead", "vk2g-shake");
+    scene?.classList.remove("vk2g-dead", "vk2g-shake", "vk2g-battle", "vk2g-low");
     scene = null;
     tintKey = "";
     parts.length = 0;
     rings.length = 0;
+    sparks.length = 0;
+    pets = [];
+    foe = null;
+    st.sprite = null;
     delete document.documentElement.dataset.vk2Omen;
   }
+  function removeAll() {
+    remove();
+    syncPage(null);
+    wasBirth = false;
+  }
+
+  // ---------- Màn đầu thai và màn chết: hai màn này không nằm trong cảnh nên có canvas riêng ----------
+
+  let page = null;
+  let pageMode = null;
+  let PW = 0;
+  let PH = 0;
+  const motes = [];
+  const pageStars = [];
+  function syncPage(mode) {
+    const html = document.documentElement;
+    const host = mode === "birth" ? document.body : mode === "death" ? document.querySelector(".sheet-backdrop") : null;
+    if (!mode || !host) {
+      page?.remove();
+      page = null;
+      pageMode = null;
+      stats.mode = null;
+      html.classList.remove("vk2g-birth", "vk2g-dying");
+      return;
+    }
+    if (pageMode !== mode || page?.parentNode !== host) {
+      page?.remove();
+      page = document.createElement("canvas");
+      page.className = `vk2g-page vk2g-page-${mode}`;
+      page.setAttribute("aria-hidden", "true");
+      // Trong bảng chết, canvas đứng trước .sheet để hạt bay phía sau tờ giấy
+      if (mode === "death") host.insertBefore(page, host.firstChild);
+      else host.appendChild(page);
+      pageMode = mode;
+      stats.mode = mode;
+      PW = 0;
+      motes.length = 0;
+      html.classList.toggle("vk2g-birth", mode === "birth");
+      html.classList.toggle("vk2g-dying", mode === "death");
+    }
+    const nw = Math.max(1, Math.ceil(innerWidth / PIXEL));
+    const nh = Math.max(1, Math.ceil(innerHeight / PIXEL));
+    if (nw !== PW || nh !== PH) {
+      PW = page.width = nw;
+      PH = page.height = nh;
+      pageStars.length = 0;
+      for (let i = 0; i < Math.min(160, (PW * PH) / 500); i++) pageStars.push({ x: rnd(0, PW), y: rnd(0, PH), p: rnd(0, 6), s: Math.random() < 0.12 ? 2 : 1, c: Math.random() < 0.2 ? "#ffe9a8" : "#dfe6ff" });
+    }
+  }
+  const PAGE_RATE = { birth: 5, death: 7 };
+  const MAX_MOTES = 50;
+  function stepPage(dt) {
+    const rate = PAGE_RATE[pageMode] * amount() * dt;
+    if (Math.random() < rate && motes.length < MAX_MOTES) {
+      if (pageMode === "birth") motes.push({ x: rnd(0, PW), y: PH + 1, vy: rnd(-16, -7), life: 0, max: rnd(4, 9), c: Math.random() < 0.7 ? "#ffd866" : "#ffb45a", p: rnd(0, 6) });
+      else motes.push({ x: rnd(0, PW), y: PH + 1, vy: rnd(-22, -9), life: 0, max: rnd(4, 8), c: Math.random() < 0.6 ? "#b8d4ff" : "#eaf4ff", p: rnd(0, 6) });
+    }
+    for (let i = motes.length - 1; i >= 0; i--) {
+      const m = motes[i];
+      m.life += dt;
+      m.y += m.vy * dt;
+      m.x += Math.sin(t * 1.4 + m.p) * 5 * dt;
+      if (m.life >= m.max) motes.splice(i, 1);
+    }
+  }
+  /** Bánh xe luân hồi: ba vòng chấm quay ngược chiều nhau và sáu nan, nằm sau các bảng. */
+  function drawWheel(g) {
+    const x = PW / 2;
+    const y = PH * 0.42;
+    const R = Math.min(PW, PH) * 0.4;
+    const spin = t * 0.12;
+    dottedRing(g, x, y, R, R, 72, spin, "#ffd866", 0.42);
+    dottedRing(g, x, y, R * 0.8, R * 0.8, 36, -spin * 1.6, "#ffb45a", 0.38);
+    dottedRing(g, x, y, R * 0.34, R * 0.34, 18, spin * 2.4, "#ffe9a8", 0.5);
+    g.fillStyle = "#ffd866";
+    g.globalAlpha = 0.28;
+    for (let i = 0; i < 6; i++) {
+      const a = spin + (i / 6) * Math.PI * 2;
+      for (let r = R * 0.38; r < R * 0.78; r += 3) g.fillRect(Math.round(x + Math.cos(a) * r), Math.round(y + Math.sin(a) * r), 1, 1);
+    }
+    g.globalAlpha = 1;
+  }
+  function drawPage() {
+    const g = page.getContext("2d");
+    g.clearRect(0, 0, PW, PH);
+    if (pageMode === "birth") {
+      for (const s of pageStars) {
+        g.fillStyle = s.c;
+        g.globalAlpha = 0.5 + 0.4 * Math.sin(t * 1.2 + s.p);
+        g.fillRect(Math.round(s.x), Math.round(s.y), s.s, s.s);
+      }
+      drawWheel(g);
+    }
+    for (const m of motes) {
+      const k = 1 - m.life / m.max;
+      g.fillStyle = m.c;
+      g.globalAlpha = Math.min(1, k * 2) * (pageMode === "death" ? 0.7 : 0.85);
+      g.fillRect(Math.round(m.x), Math.round(m.y), 1, 1);
+      if (pageMode === "death") {
+        // Vệt mờ phía dưới: linh hồn đang bay lên
+        g.globalAlpha *= 0.4;
+        g.fillRect(Math.round(m.x), Math.round(m.y) + 1, 1, 2);
+      }
+    }
+    g.globalAlpha = 1;
+  }
+  /** Vừa rời màn đầu thai: một quầng sáng ở chỗ nhân vật sinh ra. */
+  function born() {
+    stats.born++;
+    if (amount() <= 0 || reduced() || !st.sprite) return;
+    const { x, y, h } = st.sprite;
+    flash = 0.85;
+    flashColor = "#fff3c4";
+    rings.push({ x, y: y - h / 2, r: 2, v: 80, life: 0, max: 0.9, c: "#ffe9a8" });
+    rings.push({ x, y: y - h / 2, r: 1, v: 44, life: 0, max: 1, c: "#ffd866" });
+    burst(x, y - h / 2, 26, "#ffe9a8", 46);
+  }
+
   function mount() {
     const s = document.querySelector(".scene");
     if (!s) return false;
@@ -516,12 +753,28 @@
       const dt = Math.min(0.1, (now - last) / 1000);
       const real = now - last;
       last = now;
+      const still = reduced();
+      const birth = !!document.querySelector(".birth-flow");
+      syncPage(birth ? "birth" : document.querySelector(".scene-dead") ? "death" : null);
+      if (page) {
+        if (!still) {
+          t += dt; // Cảnh đang dừng khi chết, nên màn này tự đếm thời gian
+          stepPage(dt);
+        }
+        drawPage();
+      }
+      if (birth) wasBirth = true;
       if (!mount()) return;
       read(now);
-      const still = reduced();
+      readBattle();
+      if (wasBirth) {
+        wasBirth = false;
+        born();
+      }
       const paused = scene.classList.contains("paused");
       stepLight(dt);
-      if (!still && !paused) {
+      const live = !still && !paused;
+      if (live) {
         t += dt;
         emit(dt);
         stepParts(dt);
@@ -532,6 +785,7 @@
       f.clearRect(0, 0, W, H);
       drawSky(b);
       drawAura(b);
+      drawPets(b, live, dt);
       drawRays(f);
       drawMist(f);
       drawParts(f);
@@ -550,7 +804,7 @@
       if (stats.errors === 1) console.warn("[VK2 fx]", err);
       if (stats.errors > 20) {
         level = "off";
-        remove();
+        removeAll();
       }
     }
   }
@@ -562,7 +816,7 @@
       localStorage.setItem(KEY, next);
     } catch {}
     document.documentElement.classList.toggle("vk2g-on", next !== "off");
-    if (next === "off") remove();
+    if (next === "off") removeAll();
   }
 
   // ---------- Cài đặt ----------

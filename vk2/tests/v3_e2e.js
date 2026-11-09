@@ -2,6 +2,7 @@
 // Cần server: `python serve_mod.py`, Edge đã cài.
 // Dùng: NODE_PATH=<thư mục có playwright-core> node vk2/tests/v3_e2e.js [thư-mục-ảnh]
 const { chromium } = require("playwright-core");
+const { guard } = require("./popups");
 const path = require("node:path");
 
 const BASE = process.env.VK2_URL || "http://127.0.0.1:8766";
@@ -599,6 +600,7 @@ async function attempt() {
   try {
     const ctx = await browser.newContext({ viewport: { width: 1100, height: 900 } });
     const page = await ctx.newPage();
+    await guard(page);
     const errors = [];
     const outbound = [];
     page.on("pageerror", (e) => errors.push(e.message));

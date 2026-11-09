@@ -2,6 +2,7 @@
 // Dùng: python build_mod.py --base /bok; BASE=/bok PORT=8777 python serve_mod.py
 //       VK2_URL=http://localhost:8777/bok NODE_PATH=<...> node vk2/tests/pages.js [thư-mục-ảnh]
 const { chromium } = require("playwright-core");
+const { guard } = require("./popups");
 const path = require("node:path");
 
 const ROOT = process.env.VK2_URL;
@@ -20,6 +21,7 @@ const check = (name, ok, extra = "") => {
   const browser = await chromium.launch({ channel: "msedge", headless: true });
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   const page = await ctx.newPage();
+  await guard(page);
   const bad = new Set();
   const missingSprites = new Set();
   const external = new Set();

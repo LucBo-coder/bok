@@ -1,6 +1,7 @@
 // Kiểm thử save của chế độ khách khi tắt hẳn trình duyệt rồi mở lại, dùng hồ sơ trình duyệt thật trên đĩa.
 // Dùng: VK2_URL=http://127.0.0.1:8766 NODE_PATH=<...> node vk2/tests/restart.js <thư-mục-hồ-sơ-tạm>
 const { chromium } = require("playwright-core");
+const { guard } = require("./popups");
 const fs = require("node:fs");
 
 const ROOT = process.env.VK2_URL || "http://127.0.0.1:8766";
@@ -27,6 +28,7 @@ async function open() {
     }
   });
   const page = ctx.pages()[0] ?? (await ctx.newPage());
+  await guard(page);
   await page.goto(`${ROOT}/choi/`, { waitUntil: "load" });
   return { ctx, page };
 }

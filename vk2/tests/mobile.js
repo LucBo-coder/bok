@@ -1,6 +1,7 @@
 // Kiểm thử giả lập điện thoại qua địa chỉ LAN thật (HTTP, không phải secure context như localhost).
 // Dùng: VK2_URL=http://<ip>:8766 NODE_PATH=<...> node vk2/tests/mobile.js [thư-mục-ảnh]
 const { chromium } = require("playwright-core");
+const { guard } = require("./popups");
 const path = require("node:path");
 
 const BASE = process.env.VK2_URL;
@@ -175,6 +176,7 @@ async function run(page, size) {
   for (const [size, w, h] of [["360x640", 360, 640], ["390x844", 390, 844]]) {
     const ctx = await browser.newContext({ viewport: { width: w, height: h }, isMobile: true, hasTouch: true, deviceScaleFactor: 2, userAgent: "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Mobile Safari/537.36" });
     const page = await ctx.newPage();
+    await guard(page);
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
     page.on("console", (m) => {

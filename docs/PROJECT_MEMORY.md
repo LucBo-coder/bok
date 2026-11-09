@@ -91,3 +91,7 @@ Pages đang ở chế độ deploy từ gốc nhánh `main`, nên bản dựng �
 - Khung sprite cao hơn nhân vật: đầu khoảng 36%, chân khoảng 83% chiều cao khung.
 - Mọi CSS nằm dưới `html.vk2g-on`, nên mức Tắt trả về đúng hình gốc.
 - Trong khi đồ họa bật, `VK2Can.omenIs` có dữ liệu từ năm đầu tiên nhờ điểm vá `nP`.
+- Trận chiến đọc từ DOM: `.dmg.p` là đòn của người chơi (trúng quái), `.dmg.m` là đòn của quái (trúng người chơi), chữ không bắt đầu bằng `-số` thì bỏ qua.
+- Game có thể ghi đè `className` của `.scene`, nên các lớp `vk2g-*` được đặt lại ở mỗi lượt đọc, không chỉ khi trạng thái đổi.
+- Màn đầu thai không nằm trong `.scene`. Canvas `.vk2g-page-birth` gắn vào `body` với `z-index: -1`, nên `body` phải trong suốt, nếu không nền của nó che canvas. Canvas màn chết nằm trong `.sheet-backdrop`, đứng trước `.sheet`.
+- Popup `position: fixed` có `offsetParent` là null. Khi test kiểm popup có đang mở không, phải dùng `getClientRects()`.
