@@ -134,3 +134,20 @@
   .vk2-q-bot { flex-wrap: wrap; }
   .vk2-t-grid { grid-template-columns: 1fr; }
 }
+/* Bản 3.0: mục con, hướng dẫn ngắn và ô nhập */
+.vk2-subtabs { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px 8px; border-bottom: 2px solid var(--shadow); background: var(--paper-2); }
+.vk2-subtabs button { font: inherit; font-size: 14px; font-weight: 600; color: var(--ink); background: var(--paper-3); border: 2px solid var(--shadow); padding: 2px 10px; min-height: 36px; cursor: pointer; }
+.vk2-subtabs button.on { background: var(--jade); color: var(--paper-3); border-color: var(--ink); }
+.vk2-subtabs button:focus-visible { outline: 3px solid var(--gold); outline-offset: 1px; }
+.vk2-guide { background: var(--paper-3); border-left: 4px solid var(--gold); padding: 6px 10px; font-size: 14px; margin-bottom: 8px; }
+.vk2-guide p { margin: 2px 0; }
+.vk2-lock { color: var(--red); font-size: 14px; margin: 4px 0; }
+.vk2-field { display: grid; gap: 2px; font-size: 13px; color: var(--muted); margin-top: 4px; }
+.vk2-field input, .vk2-field select { font: inherit; font-size: 16px; color: var(--ink); background: var(--paper); border: 2px solid var(--ink); padding: 4px 6px; min-height: 36px; width: 100%; box-sizing: border-box; }
+.vk2-tabs button { padding: 4px 8px; font-size: 14px; }
+@media (max-width: 480px) { .vk2-tabs button { padding: 2px 6px; min-height: 36px; font-size: 13px; } }
+.vk2-tier { font-weight: 600; }
+.vk2-tier-1 { color: #2f7d4f; }
+.vk2-tier-2 { color: #2f5f9e; }
+.vk2-tier-3 { color: #8a4bb0; }
+.vk2-tier-4 { color: #b5651d; }

@@ -1,6 +1,6 @@
 # QUEST SYSTEM
 
-Trạng thái: đã triển khai ở client sandbox. Code: `vk2/data.js`, `vk2/core.js`, `vk2/ui.js`.
+Trạng thái: đã triển khai ở client sandbox. Code: `vk2/data.js`, `vk2/core.js`, `vk2/ui.js`, cộng phần `QUESTS` của từng module 3.0.
 
 ## Nhóm nhiệm vụ
 
@@ -9,6 +9,7 @@ Trạng thái: đã triển khai ở client sandbox. Code: `vk2/data.js`, `vk2/c
 | Chính tuyến | 19 | Nhân vật | Linh thạch, chỉ số, tu vi theo số năm |
 | Chuẩn bị đột phá | 18 (3 mỗi cảnh giới) | Nhân vật | +2% tỷ lệ đột phá kế tiếp |
 | Căn cơ | 8 | Nhân vật | Linh thạch, chỉ số |
+| Các module 3.0 | `dao` 6, `khi` 6, `the` 7, `phap` 4, `menh` 1 và chuỗi của Thiên Mệnh | Nhân vật | Theo từng nhiệm vụ |
 | Thiên phú | Theo thiên phú đang vận hành | Nhân vật | Lên bậc |
 | Hằng ngày | 3/ngày từ 6 việc | Tài khoản | Linh thạch theo cảnh giới, kinh nghiệm thiên phú |
 | Luân hồi | 7 | Tài khoản | Phúc duyên, một lần |
@@ -41,3 +42,6 @@ Lần đầu gặp nhân vật chưa có `vk2`, nhiệm vụ chính tuyến đã
 - Bảng theo dõi nằm trong luồng trang dưới sân khấu, không phủ lên nhân vật.
 - Thứ tự: ghim, chờ nhận thưởng, rồi chính tuyến, thiên phú, cảnh giới, hằng ngày, luân hồi.
 - Mở nhật ký thì thời gian game dừng, đóng thì khôi phục trạng thái chạy trước đó.
+
+## Nhóm Thiên Hạ Ký Sự (`su`)
+`su_first` (trải qua 5 biến cố), `su_chain` (can dự một cục diện), `su_finish` (thấy một cục diện kết thúc), `su_karma` (giải một mối nhân quả). Đọc số liệu thật từ `c.vk2.su` và `acct.world.chainHist`, nút đi tới mở tab `chronicle`.

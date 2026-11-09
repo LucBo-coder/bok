@@ -54,32 +54,34 @@ Nguồn là bundle production đã minify, không có TypeScript, API server hay
 
 ## Kế hoạch 3.0
 
-Master prompt 3.0 (09/11/2026) thay cho các mục GĐ3–GĐ6 cũ, và có cách đánh số giai đoạn riêng (3.0-GĐ1 đến 3.0-GĐ6).
+Master prompt 3.0 (09/11/2026) thay cho các mục GĐ3–GĐ6 cũ, và có cách đánh số giai đoạn riêng (3.0-GĐ1 đến 3.0-GĐ6). Cả 6 giai đoạn đã có code.
 
 ### Đối chiếu 18 hệ thống với code hiện có
 
-"Mức đọc" cho biết độ tin cậy của cột Hiện trạng: chỉ tìm từ khóa thì phải đọc kỹ lại code trước khi thiết kế giai đoạn đó.
+"Mức đọc" cho biết độ tin cậy của cột "Game gốc đã có".
 
 | # | Hệ thống | Game gốc đã có | Mức đọc | Giai đoạn | Trạng thái |
 |---:|---|---|---|---:|---|
 | 1 | Kinh mạch, đan điền, chu thiên | Chỉ có văn bản; sự kiện khổ tu quá độ | Đọc kỹ | 1 | **Xong** |
-| 2 | Thể chất và huyết mạch | Không có thể chất; huyết mạch `huyetMach` từ linh thú | Đọc một phần | 1 | **Thể chất xong**; huyết mạch qua cơ duyên, gia tộc chờ GĐ2, GĐ4 |
+| 2 | Thể chất và huyết mạch | Không có thể chất; huyết mạch `huyetMach` từ linh thú | Đọc một phần | 1, 2, 4 | **Xong**; có 3 huyết mạch mới, thức tỉnh qua truyền thừa, gia tộc, hậu duệ |
 | 3 | Đạo cơ, phẩm chất Kim Đan | Chỉ có văn bản | Đọc kỹ | 1 | **Xong** |
-| 4 | Ngộ đạo, sáng tạo công pháp | Công pháp có tầng và kinh nghiệm, lĩnh ngộ chiêu từ quái; chưa có kết hợp | Từ khóa | 2 | Chưa làm |
-| 5 | Bí cảnh nhiều tầng | Dạng sự kiện (`bi_canh`), chưa có tầng và rút lui | Từ khóa | 2 | Chưa làm |
-| 6 | Truyền thừa cổ tu | Truyền công pháp qua kiếp (`cpHeir`, `cpBook`); chưa có truyền thừa theo đạo | Từ khóa | 2 | Chưa làm |
-| 7 | Sư đồ | Chuỗi sự kiện nhận đồ đệ, phản sư, sư phụ chỉ điểm; đồ đệ chưa có tiến trình riêng | Từ khóa | 4 | Chưa làm |
-| 8 | Tông môn động | Nhiều tông, cấp bậc, thí luyện; chưa có lãnh thổ, chiến tranh | Từ khóa | 4 | Chưa làm |
-| 9 | Gia tộc | Chỉ có xuất thân và văn bản | Từ khóa | 4 | Chưa làm |
-| 10 | Luyện khí, phù lục, bản mệnh | Có Lò rèn (`forge`, `forgeMap`); "bản mệnh" chỉ là hệ ngũ hành; không có phù lục | Từ khóa | 3 | Chưa làm |
-| 11 | Động phủ | Bế quan có thật, động phủ chỉ là văn bản | Đọc một phần | 3 | Chưa làm |
-| 12 | Tâm ma, chấp niệm | Chỉ số tâm ma và sự kiện `tam_ma`; chưa dựa trên lịch sử nhân vật | Đọc một phần | 5 | Chưa làm |
-| 13 | Pháp tắc, Đại Đạo | Không có | Từ khóa | 5 | Chưa làm |
-| 14 | NPC tự phát triển | Oan gia và kẻ thù có tên, không có mô phỏng theo năm | Từ khóa | 4 | Chưa làm |
-| 15 | Đại sự kiện thế giới | Thiên tượng hằng ngày, Tiên Ma đại chiến dạng sự kiện | Từ khóa | 5 | Chưa làm |
-| 16 | Thiên Đạo ghi nhớ | Kiếp Số, nghiệp lực, sự kiện "Thiên đạo chú ý" | Từ khóa | 6 | Chưa làm |
-| 17 | Thiên Mệnh cá nhân | Chỉ có thiên phú mua "Thiên mệnh chi tử" và chuỗi Hệ Thống | Từ khóa | 6 | Chưa làm |
-| 18 | Nhân quả, truyền thừa xuyên kiếp | Oan gia, bia mộ, huyết mạch, rương chôn, Mạnh Bà, Thiên thư; chưa có di sản trong thế giới | Đọc một phần | 6 | Chưa làm |
+| 4 | Ngộ đạo, sáng tạo công pháp | Công pháp có tầng và kinh nghiệm, lĩnh ngộ chiêu từ quái; chưa có kết hợp | Đọc một phần | 2 | **Xong**; 12 công thức cố định, không sinh tự do |
+| 5 | Bí cảnh nhiều tầng | Dạng sự kiện (`bi_canh`), chưa có tầng và rút lui | Đọc một phần | 2 | **Xong**; đi qua sự kiện, không có bản đồ riêng |
+| 6 | Truyền thừa cổ tu | Truyền công pháp qua kiếp (`cpHeir`, `cpBook`); chưa có truyền thừa theo đạo | Đọc một phần | 2 | **Xong** |
+| 7 | Sư đồ | Chuỗi sự kiện nhận đồ đệ, phản sư, sư phụ chỉ điểm; đồ đệ chưa có tiến trình riêng | Đọc một phần | 4 | **Xong** |
+| 8 | Tông môn động | Nhiều tông, cấp bậc, thí luyện; chưa có lãnh thổ, chiến tranh | Đọc một phần | 4 | **Xong** |
+| 9 | Gia tộc | Chỉ có xuất thân và văn bản | Từ khóa | 4 | **Xong** |
+| 10 | Luyện khí, phù lục, bản mệnh | Có Lò rèn (`forge`, `forgeMap`); "bản mệnh" chỉ là hệ ngũ hành; không có phù lục | Đọc một phần | 3 | **Xong**, trừ cơ chế trận trong trận thời gian thực (chỉ nhận chỉ số) |
+| 11 | Động phủ | Bế quan có thật, động phủ chỉ là văn bản | Đọc một phần | 3 | **Xong** |
+| 12 | Tâm ma, chấp niệm | Chỉ số tâm ma và sự kiện `tam_ma`; chưa dựa trên lịch sử nhân vật | Đọc một phần | 5 | **Xong** |
+| 13 | Pháp tắc, Đại Đạo | Không có | Từ khóa | 5 | **Xong**, trừ cơ chế trận trong trận thời gian thực |
+| 14 | NPC tự phát triển | Oan gia và kẻ thù có tên, không có mô phỏng theo năm | Đọc một phần | 4 | **Xong**; 34–60 NPC mô phỏng theo năm |
+| 15 | Đại sự kiện thế giới | Thiên tượng hằng ngày, Tiên Ma đại chiến dạng sự kiện | Từ khóa | 5 | **Xong** |
+| 16 | Thiên Đạo ghi nhớ | Kiếp Số, nghiệp lực, sự kiện "Thiên đạo chú ý" | Đọc một phần | 6 | **Xong** |
+| 17 | Thiên Mệnh cá nhân | Chỉ có thiên phú mua "Thiên mệnh chi tử" và chuỗi Hệ Thống | Đọc một phần | 6 | **Xong**; chuỗi Thiên Sát Cô Tinh ít đi tới kết cục trong mô phỏng |
+| 18 | Nhân quả, truyền thừa xuyên kiếp | Oan gia, bia mộ, huyết mạch, rương chôn, Mạnh Bà, Thiên thư; chưa có di sản trong thế giới | Đọc một phần | 6 | **Xong**; đọc Phúc duyên, Nghiệp, Kiếp số, Hồn lực; chưa dùng Mạnh Bà, Sổ Sinh Tử, Thiên thư làm điều kiện |
+
+"Xong" ở đây là: có code, có hiệu ứng thật lên nhân vật, đã qua test logic, test trong game và mô phỏng. Chưa có nghĩa là đã cân bằng: chưa có người chơi thật nào chơi các hệ thống này.
 
 ### 3.0-GĐ1 — Căn cơ: xong ở mức client sandbox
 
@@ -97,9 +99,22 @@ Code: `vk2/can.js`. Chi tiết ở [CULTIVATION_SYSTEM](CULTIVATION_SYSTEM.md), 
 - [ ] Mô phỏng chưa gồm trận đấu thời gian thực, nên các thể chất cần nhiều trận thắng chưa được đo
 - [ ] Huyết mạch thức tỉnh qua cơ duyên, truyền thừa, gia tộc: cần GĐ2 và GĐ4
 
-### Các giai đoạn 3.0 còn lại: chưa bắt đầu
+### 3.0-GĐ2 đến GĐ6: xong ở mức client sandbox
 
-GĐ2 bí cảnh, truyền thừa, ngộ đạo, sáng tạo công pháp · GĐ3 luyện khí, phù lục, bản mệnh, động phủ · GĐ4 sư đồ, gia tộc, tông môn động, NPC · GĐ5 tâm ma, pháp tắc, đại sự kiện · GĐ6 Thiên Đạo, Thiên Mệnh, nhân quả xuyên kiếp.
+Code: `vk2/dao.js`, `khi.js`, `the.js`, `phap.js`, `menh.js`, giao diện ở `vk2/ui3.js`. Chi tiết ở [WORLD_SYSTEM](WORLD_SYSTEM.md), kết quả ở [TEST_REPORT](TEST_REPORT.md).
+
+- [x] GĐ2: 8 bí cảnh nhiều tầng, 6 truyền thừa, 15 đạo niệm, 12 công thức sáng tạo công pháp, 3 huyết mạch
+- [x] GĐ3: 7 nguyên liệu, 5 loại pháp bảo, cường hóa +9, khí linh, bản mệnh, 5 loại phù, động phủ 3 đất và 7 công trình
+- [x] GĐ4: thế giới theo năm trong tài khoản, NPC, sư đồ, tông môn động, gia tộc, kẻ thù
+- [x] GĐ5: 7 loại chấp niệm, tâm ma, 13 pháp tắc 6 bậc, 8 đại biến
+- [x] GĐ6: sổ Thiên Đạo, 5 quy tắc có ngưỡng, 4 Thiên Mệnh, di sản xuyên kiếp, nợ nhân quả
+- [x] Không thêm tab trên màn hình chính: mọi thứ nằm trong các nhóm của bảng Hành trình
+- [x] Mô tả trên trang chủ và mục "Cách chơi" được đổi lúc build (`TEXT_EDITS`)
+- [ ] Cân bằng bằng chơi thật: thông số mới được chỉnh theo mô phỏng
+- [ ] Trận thời gian thực nhận chỉ số nhưng không nhận cơ chế trận (đánh thêm, hút máu, né) của pháp bảo, phù, pháp tắc
+- [x] Sửa lỗi trang tải lại liên tục khi chọn tiếng Anh, có test `lang.js`
+- [ ] Cân bằng theo mô phỏng chưa đạt: Cân bằng, Ổn định tới Hóa Thần gần gấp đôi đối chứng, Tà đạo tụt mạnh (số liệu ở TEST_REPORT)
+- [ ] Chưa thử: văn bản sự kiện 3.0 bằng tiếng Anh, điện thoại thật, Safari, và bản 3.0 đầy đủ trên trang Pages thật
 
 ## Phạm vi hiện tại
 
@@ -108,3 +123,8 @@ Cập nhật 09/11/2026: bản sandbox đã chạy trên GitHub Pages tại http
 Chủ dự án chốt ngày 09/11/2026: chỉ chạy local trên máy tính và điện thoại, không làm backend. Vì vậy các mục phía server ở trên không còn là việc cần làm, và việc gian lận qua localStorage được chấp nhận. Sandbox giữ nguyên.
 
 Nếu sau này muốn phát hành online: cần nối lại repo gốc (mod dựa trên 5 chuỗi minify của đúng một build) và làm RPC phía server (xem DATABASE_DESIGN.md).
+
+## Hệ thống sự kiện động: có code, có test, chờ commit
+- [x] GĐ1 Event Engine, GĐ2 Chuỗi, GĐ3 NPC và thế giới, GĐ4 Nhân quả và luân hồi, GĐ5 Nội dung, GĐ6 Giao diện và kiểm thử.
+- [x] 132 sự kiện đơn, 30 giai đoạn có lựa chọn, 22 chuỗi, 50 kết cục, 3 mạch đời NPC.
+- [ ] Cân bằng Tà đạo vẫn thấp hơn đối chứng, chưa xử lý.

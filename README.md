@@ -2,7 +2,7 @@
 
 *Một kiếp người, vạn con đường tu tiên.*
 
-Game pixel tu tiên trùng sinh chơi trên trình duyệt. Bạn đầu thai với linh căn và xuất thân ngẫu nhiên, mỗi năm chọn một trọng tâm để sống, rồi đi từ phàm nhân tới phi thăng theo một trong sáu con đường: Kiếm, Đan, Trận, Phật, Ma, Yêu. Mỗi kỳ ngộ đẩy Đạo tâm về phía Chính hoặc Tà. Khi hết thọ nguyên, bạn để lại bia mộ và mang phúc duyên sang kiếp sau. Bản 2.0 thêm nhiệm vụ, thiên phú lớn dần theo cách sống, và linh căn đa hệ.
+Game pixel tu tiên trùng sinh chơi trên trình duyệt. Bạn đầu thai với linh căn và xuất thân ngẫu nhiên, mỗi năm chọn một trọng tâm để sống, rồi đi từ phàm nhân tới phi thăng theo một trong sáu con đường: Kiếm, Đan, Trận, Phật, Ma, Yêu. Mỗi kỳ ngộ đẩy Đạo tâm về phía Chính hoặc Tà. Khi hết thọ nguyên, bạn để lại bia mộ và mang phúc duyên sang kiếp sau. Bản 2.0 thêm nhiệm vụ, thiên phú lớn dần theo cách sống, và linh căn đa hệ. Bản 3.0 thêm căn cơ, bí cảnh, sáng tạo công pháp, pháp bảo, động phủ, một thế giới có NPC, tông môn và gia tộc sống qua các kiếp, tâm ma, pháp tắc, Thiên Mệnh, và di sản mà kiếp sau có thể tìm lại.
 
 Chơi ngay: https://lucbo-coder.github.io/bok/play/choi/ · Mô tả đầy đủ: [docs/GAME_DESIGN.md](docs/GAME_DESIGN.md)
 
@@ -10,14 +10,14 @@ Chơi ngay: https://lucbo-coder.github.io/bok/play/choi/ · Mô tả đầy đ�
 - **Ngày thu thập:** 09/11/2026
 - **Nội dung:** toàn bộ phần client công khai (HTML, JS, CSS, hình ảnh, dữ liệu i18n) và một bản mirror chạy được offline.
 
-## Bản nâng cấp 2.0 (sandbox)
+## Bản nâng cấp 2.0 và 3.0 (sandbox)
 
 ```powershell
 python build_mod.py
 python serve_mod.py
 ```
 
-Mở http://127.0.0.1:8766/choi/. Muốn chơi trên điện thoại cùng Wi-Fi, chạy `python serve_mod.py --lan` rồi mở địa chỉ `192.168.x.x` được in ra. Máy tính phải bật trong lúc chơi, và save trên mỗi thiết bị là riêng. Bản này thêm hệ nhiệm vụ, thiên phú và linh căn, chạy tách khỏi `site/` gốc và chặn mọi kết nối tới backend thật. Trạng thái và giới hạn xem [docs/TASKS.md](docs/TASKS.md) và [docs/TEST_REPORT.md](docs/TEST_REPORT.md).
+Mở http://127.0.0.1:8766/choi/. Muốn chơi trên điện thoại cùng Wi-Fi, chạy `python serve_mod.py --lan` rồi mở địa chỉ `192.168.x.x` được in ra. Máy tính phải bật trong lúc chơi, và save trên mỗi thiết bị là riêng. Bản này chạy tách khỏi `site/` gốc và chặn mọi kết nối tới backend thật. Trạng thái và giới hạn xem [docs/TASKS.md](docs/TASKS.md) và [docs/TEST_REPORT.md](docs/TEST_REPORT.md).
 
 ## Tóm tắt
 

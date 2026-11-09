@@ -15,17 +15,37 @@ CHUNKS = "_next/static/immutable/chunks"
 HOOK = "globalThis.__VK2"
 
 PATCHES = {
+    # Game gốc tải lại trang để server đọc cookie và trả HTML tiếng Anh. Site tĩnh luôn trả bản tiếng Việt
+    # nên trang tải lại mãi. Bỏ lệnh này thì chữ được đổi ngay ở client.
+    "3hv4tg13vrxln.js": [
+        ("e&&location.reload()}u(!0)", "}u(!0)"),
+    ],
     # Cầu nối tới state của component game. Đặt ở nhánh render khi đang chơi, sau khi mọi hàm đã khai báo.
     "2weh91tpivddk.js": [
         (
             "let tk=nq.current,",
             f"{HOOK}&&{HOOK}.bind({{charRef:nq,metaRef:F,setMeta:E,saveMeta:e=>(0,X.m)(nA.current,e).catch(()=>{{}}),"
-            "rerender:nG,save:nV,openPanel:eq,mutate:tl,setRunning:eF,running:eE,user:j,game:O});let tk=nq.current,",
+            "rerender:nG,save:nV,openPanel:eq,mutate:tl,setRunning:eF,running:eE,user:j,game:O,"
+            "pendingRef:nE});let tk=nq.current,",
         ),
     ],
     "0pcagq3015zh_.js": [
         # Một năm của game: căn cơ được xử lý đúng một lần mỗi năm, kể cả trong bế quan
-        ("function nP(n,l){var", f"function nP(n,l){{{HOOK}&&{HOOK}.onYear(n,arguments[2]);var"),
+        # Bản gốc đổi tên thành nP0. Năm không có kỳ ngộ của game thì mod được phép đưa sự kiện của mình vào.
+        (
+            "function nP(n,l){var",
+            f"function nP(n,l){{{HOOK}&&{HOOK}.onYear(n,arguments[2]);var __r=nP0.apply(this,arguments);"
+            f"return __r||n.dead||!{HOOK}?__r:{HOOK}.yearEvent(n,arguments[2],nD)}}function nP0(n,l){{var",
+        ),
+        # Tra định nghĩa sự kiện theo id: thêm sự kiện của mod, vẫn lưu và khôi phục được như sự kiện gốc
+        ("function nJ(n,e){return e===nX?", f"function nJ(n,e){{var __m={HOOK}&&{HOOK}.eventDef(n,e);if(__m)return __m;return e===nX?"),
+        # Sau một lựa chọn: sự kiện nhiều bước của mod (như các tầng bí cảnh) đi tiếp ngay trong cùng năm
+        (
+            "let m=nS(n,a,o);return m||(nV(n)?nD(n,nI(n)):null)}function n1(",
+            f"let m=nS(n,a,o);return m||(nV(n)?nD(n,nI(n)):null)||({HOOK}?{HOOK}.chainEvent(n,nD):null)}}function n1(",
+        ),
+        # Chỉ số và cấp chiến đấu thật, để trận trong bí cảnh dùng cùng công thức với game
+        ("function nd(n){var e,i;let h=", f"function nd(n){{var e,i;{HOOK}&&{HOOK}.captureCombat(nd,nr);let h="),
         # Hàm kiểm tra thiên tượng hôm nay, dùng khi đúc đạo cơ và Kim Đan
         ('.06*!!(0,r.w)("loi_van")', f'.06*!!({HOOK}&&{HOOK}.captureOmen(r.w),(0,r.w)("loi_van"))'),
         # Tốc độ tu luyện
@@ -40,6 +60,11 @@ PATCHES = {
             "let c=(0,t.l)(n,{hp:l,atk:o,def:r});",
             f"let c=(0,t.l)(n,{HOOK}?{HOOK}.stat(n,{{hp:l,atk:o,def:r}}):{{hp:l,atk:o,def:r}});",
         ),
+        # Sau khi một lựa chọn đã chạy: ghi vào nhật ký sự kiện, gồm cả kỳ ngộ gốc
+        (
+            'a.log(`${e.title}: ${l.label}. ${h}`,n.dead?"big":c);',
+            f'{HOOK}&&{HOOK}.onChoice(n,e,l);a.log(`${{e.title}}: ${{l.label}}. ${{h}}`,n.dead?"big":c);',
+        ),
         # Hàm thưởng khi thắng quái
         ("function nx(n,a,h){", f"function nx(n,a,h){{{HOOK}&&{HOOK}.onKill(n);"),
     ],
@@ -50,6 +75,40 @@ ROUTES = "choi|dang-nhap|bang-xep-hang|loi-dai|cap-nhat|gop-y|nghia-trang|tang-k
 ASSETS = "_next|icons|bg|lpc|px|i18n-dict|icon|apple-icon|og"
 ABS_PATH = re.compile(rf"""(?<=["'`(])/(?=(?:{ASSETS}|{ROUTES})(?:[/"'`?#.)\\$]|$))""")
 HOME_LINK = re.compile(r"""(href[:=]\\?["'])/(\\?["'])""")
+
+
+# Lời giới thiệu trên trang: có mặt ở HTML, chunk và từ điển dịch, nên thay ở cả ba, và phải tìm thấy.
+TEXT_EDITS = (
+    (
+        "đầu thai ngẫu nhiên, tu luyện từ phàm nhân tới phi thăng, chọn chính hay tà, vào tông môn, đấu lôi đài hằng ngày. Chơi miễn phí",
+        "mỗi kiếp là một đời người, tu luyện từ phàm nhân tới phi thăng, chọn chính hay tà, lập tông môn, nhận đồ đệ, để lại di sản cho kiếp sau. Chơi miễn phí",
+    ),
+    (
+        "Lên Luyện Khí tầng 5 sẽ chọn con đường tu tập. Hết thọ nguyên thì chết, để lại bia mộ và mang phúc duyên sang kiếp sau.",
+        "Lên Luyện Khí tầng 5 sẽ chọn con đường tu tập. Trên đường đi có thể vào bí cảnh, sáng tạo công pháp, luyện pháp bảo, dựng động phủ, bái sư, nhận đồ đệ và lập tông môn. Hết thọ nguyên thì chết, để lại bia mộ và mang phúc duyên sang kiếp sau. Những gì bạn gây dựng vẫn còn trong thế giới, và kiếp sau có thể gặp lại.",
+    ),
+    (
+        "At Qi Refining Layer 5 you choose your Path. When your lifespan runs out you die, leave a tombstone, and carry your Fortune into the next life.",
+        "At Qi Refining Layer 5 you choose your Path. Along the way you can enter secret realms, create arts, forge treasures, build an abode, find a master, take disciples and found a sect. When your lifespan runs out you die, leave a tombstone, and carry your Fortune into the next life. What you built stays in the world, and a later life may find it again.",
+    ),
+)
+
+
+def apply_text_edits(out):
+    files = [*out.rglob("*.html"), *(out / CHUNKS).glob("*.js"), out / "i18n-dict.json"]
+    for old, new in TEXT_EDITS:
+        hits = 0
+        for path in files:
+            text = path.read_text("utf-8")
+            if old in text:
+                hits += 1
+                path.write_text(text.replace(old, new), "utf-8", newline="")
+        if not hits:
+            sys.exit(f"Không tìm thấy lời giới thiệu cần thay: {old[:60]}")
+
+
+# Module gameplay của bản 3.0, nạp theo thứ tự giai đoạn sau core.js và can.js.
+MODULES = ("dao", "khi", "the", "phap", "menh", "su", "su_tale", "su_tale2", "su_chain")
 
 
 def with_base(text, base):
@@ -73,7 +132,9 @@ def game_tags(base):
         f'<script src="{base}/vk2/data.js"></script>'
         f'<script src="{base}/vk2/core.js"></script>'
         f'<script src="{base}/vk2/can.js"></script>'
-        f'<script src="{base}/vk2/ui.js"></script>'
+        + "".join(f'<script src="{base}/vk2/{m}.js"></script>' for m in MODULES)
+        + f'<script src="{base}/vk2/ui.js"></script>'
+        f'<script src="{base}/vk2/ui3.js"></script>'
     )
 
 
@@ -104,6 +165,8 @@ def main():
                 sys.exit(f"Điểm vá khớp {found} lần (cần 1) trong {name}: {old[:60]}")
             text = text.replace(old, new)
         path.write_text(text, "utf-8", newline="")
+
+    apply_text_edits(OUT)
 
     # Mọi trang đều nạp chung chunk, nên trang nào cũng phải có lớp chặn mạng.
     pages = list(OUT.rglob("*.html"))

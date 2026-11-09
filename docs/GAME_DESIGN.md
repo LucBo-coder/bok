@@ -4,7 +4,7 @@
 
 Vạn Kiếp Luân Hồi là game pixel tu tiên trùng sinh chơi trên trình duyệt, có tiếng Việt và tiếng Anh. Mỗi lần chơi là trọn một đời: bạn đầu thai vào một số phận ngẫu nhiên, tự định hướng từng năm sống, đưa ra lựa chọn khi gặp kỳ ngộ, rồi chết đi và mang một phần di sản sang kiếp sau.
 
-Tài liệu này mô tả bản 4.3.0 của game gốc cùng bản nâng cấp 2.0 (VK2). Những gì VK2 thêm vào được ghi rõ ở phần riêng.
+Tài liệu này mô tả bản 4.3.0 của game gốc cùng các bản nâng cấp 2.0 và 3.0 (VK2). Những gì VK2 thêm vào được ghi rõ ở phần riêng.
 
 ## Một kiếp diễn ra thế nào
 
@@ -82,7 +82,11 @@ Linh căn có dạng từ đơn hệ đến ngũ hành. Đơn căn thiên về c
 
 Gom cảnh giới, đạo lộ, thể chất, kinh mạch, thời gian dành cho từng việc, mục tiêu kế tiếp, nhật ký có bộ lọc và các kiếp trước vào một chỗ.
 
-## Căn cơ (bản 3.0, đang phát triển)
+## Bản nâng cấp 3.0
+
+Bản 3.0 không thêm màn hình chơi mới. Mọi hệ thống đi qua những năm sống và kỳ ngộ sẵn có, và nằm trong các nhóm của bảng Hành trình. Thông số được chỉnh theo mô phỏng, chưa qua người chơi thật.
+
+### Căn cơ
 
 Tab Căn Cơ thêm một tầng tu luyện bên trong nhân vật, phát triển ngay trong những năm chọn trọng tâm Tu luyện nên không cần thao tác lặp lại.
 
@@ -91,7 +95,25 @@ Tab Căn Cơ thêm một tầng tu luyện bên trong nhân vật, phát triển
 - **Thể chất:** 10 loại như Tiên Thiên Đạo Thể, Hoang Cổ Thánh Thể, Vạn Độc Chi Thể. Mỗi kiếp một loại, loại nào cũng có nhược điểm, và phải có duyên mới thức tỉnh.
 - **Đạo cơ và Kim Đan:** khi vào Trúc Cơ và Kim Đan, người chơi chọn cách đúc. Phẩm chất phụ thuộc căn cơ đã xây, công pháp, tâm cảnh và thiên tượng, ảnh hưởng sức mạnh, khả năng lĩnh ngộ và tiềm năng. Căn cơ kém vẫn có thể cải tạo về sau, với giá đắt.
 
-Các hệ thống 3.0 còn lại (bí cảnh, động phủ, sư đồ, NPC, Thiên Đạo, Thiên Mệnh...) chưa có trong game, xem kế hoạch ở [TASKS](TASKS.md).
+### Cơ duyên và đạo
+
+Bí cảnh có nhiều tầng, đi từng tầng như một chuỗi kỳ ngộ, và có thể rút lui hoặc bị đánh gục. Truyền thừa cổ tu kèm thử thách và đôi khi là một lời hứa. Đạo niệm lớn lên theo cách bạn sống, đủ sâu thì kết hợp thành bí thuật mang tên bạn đặt, và bí thuật nào cũng có cái giá.
+
+### Của cải
+
+Luyện pháp bảo từ nguyên liệu săn được, cường hóa tới +9 với rủi ro thất bại, thức tỉnh khí linh, và từ Kim Đan thì luyện một món bản mệnh gắn liền với mạng mình. Vẽ phù dùng trong trận, bí cảnh và đột phá. Dựng động phủ trên một mảnh đất, nuôi các công trình bằng phí mỗi năm, bỏ bê thì xuống cấp và có thể bị kẻ khác dòm ngó.
+
+### Người và thế giới
+
+Thế giới có đồng hồ riêng và còn tiếp tục khi bạn chết. Vài chục NPC có tên tu luyện, kết đôi, sinh con, phản bội và báo thù. Bạn có thể bái sư, nhận đồ đệ, lập gia tộc và tông môn. Tông môn có lãnh thổ, chiến tranh và có thể bị diệt.
+
+### Tâm và trời
+
+Những gì bạn trải qua để lại chấp niệm, đủ nặng thì thành tâm ma: đối mặt, phong ấn để trả giá về sau, hay thuận theo. Từ Nguyên Anh có thể tu pháp tắc, mỗi pháp tắc đổi cách một cơ chế hoạt động. Đại biến như linh khí suy kiệt kéo dài hàng chục năm và để lại hậu quả thật. Thiên Đạo ghi sổ việc bạn làm theo những quy tắc công khai trong tab Thiên Mệnh, và khoảng một phần tư số kiếp mang theo một Thiên Mệnh riêng.
+
+### Di sản
+
+Khi chết, những gì bạn gây dựng ở lại thế giới. Kiếp sau có thể tìm lại động phủ cũ, bí thuật đã thất truyền, gặp lại đồ đệ, hậu duệ, tông môn năm xưa, hoặc kẻ thù và lời hứa còn dang dở. Luồng luân hồi của game gốc không đổi. Chi tiết ở [WORLD_SYSTEM](WORLD_SYSTEM.md).
 
 ## Mục tiêu theo từng tầm
 
@@ -111,17 +133,23 @@ Các hệ thống 3.0 còn lại (bí cảnh, động phủ, sư đồ, NPC, Thi
 
 ## Phạm vi của bản này
 
-Bản 2.0 chạy trong sandbox, ở chế độ khách, và save nằm trong trình duyệt của từng thiết bị. Vì không có backend, đăng nhập, lưu đám mây, bảng xếp hạng, lôi đài và bia công khai ở Nghĩa trang không hoạt động, dù game gốc có các tính năng này. Thông số thiên phú mới là giá trị khởi tạo, chưa được cân bằng qua chơi thật. Trạng thái chi tiết xem ở [TASKS](TASKS.md).
+Bản nâng cấp chạy trong sandbox, ở chế độ khách, và save nằm trong trình duyệt của từng thiết bị. Vì không có backend, đăng nhập, lưu đám mây, bảng xếp hạng, lôi đài và bia công khai ở Nghĩa trang không hoạt động, dù game gốc có các tính năng này. Thông số của thiên phú và các hệ thống 3.0 chưa được cân bằng qua chơi thật. Trạng thái chi tiết xem ở [TASKS](TASKS.md).
 
 ## Kiến trúc mod
 
 ```
 site/ (bản gốc, không sửa)
-  └─ build_mod.py ─ 7 điểm vá + chèn script ─▶ site-mod/
+  └─ build_mod.py ─ 12 điểm vá, đổi lời giới thiệu, chèn script ─▶ site-mod/ hoặc play/
 vk2/data.js   dữ liệu định nghĩa
 vk2/core.js   logic thuần, không chạm DOM
-vk2/can.js    căn cơ: dữ liệu và logic thuần
+vk2/can.js    căn cơ
+vk2/dao.js    bí cảnh, truyền thừa, ngộ đạo, sáng tạo công pháp
+vk2/khi.js    luyện khí, phù lục, bản mệnh, động phủ
+vk2/the.js    NPC, sư đồ, tông môn, gia tộc, kẻ thù
+vk2/phap.js   tâm ma, pháp tắc, đại biến
+vk2/menh.js   Thiên Đạo, Thiên Mệnh, di sản xuyên kiếp
 vk2/ui.js     cầu nối game và giao diện
+vk2/ui3.js    các tab của bản 3.0
 vk2/guard.js  chặn mạng trong sandbox
 ```
 
@@ -130,3 +158,8 @@ Lỗi trong mod được bắt lại và trả giá trị trung tính, để kh�
 ## Liên quan
 
 [QUEST_SYSTEM](QUEST_SYSTEM.md) · [TALENT_SYSTEM](TALENT_SYSTEM.md) · [CULTIVATION_SYSTEM](CULTIVATION_SYSTEM.md) · [REINCARNATION_SYSTEM](REINCARNATION_SYSTEM.md) · [WORLD_SYSTEM](WORLD_SYSTEM.md) · [DATABASE_DESIGN](DATABASE_DESIGN.md)
+
+## Thiên Hạ Ký Sự
+Thế giới có những cục diện lớn đi qua nhiều giai đoạn trong nhiều năm: Ma Tông tái xuất, Yêu Hoàng xuống núi, đại hạn, tranh linh mạch, người sửa Sổ Sinh Tử và nhiều chuyện khác. Bạn không tham gia thì chúng vẫn đi tới kết cục, và kết cục không cố định. Tham gia thì lựa chọn của bạn đổi được thế cuộc, và dấu vết còn lại ở những kiếp sau. Mục Thiên Hạ Ký Sự trong Hành Trình ghi các cục diện đang diễn ra, biến cố thế giới, nhân vật liên quan, lịch sử lựa chọn và nhân quả chưa giải.
+
+Sự kiện có 5 cấp: Thường, Hiếm, Sử Thi, Truyền Thuyết, Thiên Mệnh. Sự kiện ẩn không báo trước điều kiện.

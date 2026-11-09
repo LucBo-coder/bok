@@ -122,7 +122,8 @@ async function run(page, size) {
   });
   check(`${size}: Hành trình đọc được trên điện thoại`, jr.w && jr.text && jr.font >= 15, JSON.stringify(jr));
   await page.screenshot({ path: path.join(OUT, `m-${size}-journey.png`) });
-  await page.locator('#vk2-modal [data-tab="talents"]').tap();
+  await page.locator('#vk2-modal .vk2-tabs [data-tab="can"]').tap();
+  await page.locator('#vk2-modal .vk2-subtabs [data-tab="talents"]').tap();
   await sleep(300);
   const sheet = await page.evaluate(() => {
     const body = document.querySelector(".vk2-sheet-body");

@@ -1,5 +1,99 @@
 # TEST REPORT
 
+## Hệ thống sự kiện động (09/11/2026)
+
+Nội dung: 132 sự kiện đơn, 30 giai đoạn có lựa chọn (tổng 162), 22 chuỗi, 50 kết cục, 12 nhóm, 5 cấp, 3 mạch đời NPC.
+
+| Bộ test | Kết quả |
+|---|---|
+| Logic Node (gồm `su.test.js` 49 test) | 230/230 |
+| `v3_e2e` local và tiền tố `/bok/play` | 65/65, 65/65 |
+| `e2e`, `can_e2e`, `restart` | 52/52, 41/41, 7/7 |
+| `mobile` local và tiền tố | 38/38, 38/38 |
+| `pages` tiền tố | 21/21 |
+| `lang` local và tiền tố | Tất cả đạt |
+| `sim.js 100` (1200 kiếp) | 0 vi phạm, 0 lỗi trang |
+
+Mô phỏng: tài khoản lớn nhất 100 KB, linh thạch lớn nhất cuối kiếp 5419, 50/50 kết cục chuỗi đã xảy ra. Tỷ lệ tới Hóa Thần so với đối chứng: Cân bằng 38/23, Ổn định 38/27, Cưỡng ép 20/23, Xoay 23/14, Tà đạo 7/22, Luyện đan 0/0.
+
+Lỗi tìm ra và đã sửa:
+- `terr` của tông vượt 9, do `the.js` tăng không chặn và do hậu quả chuỗi.
+- Hậu quả chuỗi giảm linh mạch của mọi tông, bào mòn thế giới qua hàng nghìn năm. Nay chỉ tác động một tông.
+- Tài khoản không lưu khi rời trang, nên sau tải lại sự kiện chuỗi có thể trỏ tới thế giới cũ hơn. Nay lưu ở `pagehide`, và sự kiện đang chờ giữ tên người liên quan.
+- Bảng nhiệm vụ không có nhóm `su`. `bl: "long"` không phải huyết mạch có thật. Chữ `{npc}` chưa được điền trong dấu vết.
+
+Giới hạn:
+- `sim.js` trình duyệt gặp 99/132 sự kiện. Phần còn lại phụ thuộc thiên tượng theo ngày thật, `acct.mv`, Tiên giới hoặc chuỗi lựa chọn hiếm.
+- Mô phỏng 1500 kiếp trong `su.test.js`, với thiên tượng và chỉ số được dựng, chọn được 129/132 sự kiện và 30/30 giai đoạn. Chưa được chọn: `bc_doi_doi`, `tm_nguoi_mo_2`, `hq_tran_co`. Cả ba đạt khi dựng đúng điều kiện.
+- Sự kiện Tiên giới trong game thật chỉ kiểm bằng cách đặt `c.cosmos = "tien"`, không chơi tới phi thăng.
+- Tà đạo tới Hóa Thần thấp hơn đối chứng rõ rệt, chưa xử lý. Luyện đan vẫn chết sớm như đối chứng.
+- Chưa có người chơi thật. Tần suất khoảng 18 sự kiện mỗi kiếp với cấu hình Cân bằng là số do mô phỏng.
+
+## 3.0-GĐ2 đến GĐ6 và sửa lỗi đổi ngôn ngữ (09/11/2026)
+
+Edge headless, Node 24.15. "Local" là `site-mod/`. "Tiền tố" là `play/` chạy trên máy dưới `/bok/play`, giống đường dẫn của Pages nhưng **không phải trang Pages thật**.
+
+| Bộ kiểm thử | Kết quả | Lệnh |
+|---|---:|---|
+| Logic, 7 bộ | 181/181 | `node --test vk2/tests/*.test.js` |
+| Các hệ thống 3.0 trong game thật | 54/54 local, 54/54 tiền tố | `node vk2/tests/v3_e2e.js` |
+| End-to-end VK2 cũ | 52/52 local | `node vk2/tests/e2e.js` |
+| Căn cơ trong game thật | 41/41 local | `node vk2/tests/can_e2e.js` |
+| Giả lập điện thoại | 38/38 local, 38/38 tiền tố | `VK2_URL=... node vk2/tests/mobile.js` |
+| Tắt hẳn trình duyệt | 7/7 local | `node vk2/tests/restart.js <thư-mục>` |
+| Đường dẫn thư mục con | 21/21 tiền tố | `VK2_URL=... node vk2/tests/pages.js` |
+| Đổi ngôn ngữ | 23/23 local, 23/23 tiền tố | `VK2_URL=... node vk2/tests/lang.js` |
+| Mô phỏng 1.200 kiếp | 0 lỗi, 0 vi phạm bất biến, 0 lỗi trang | `node vk2/tests/sim.js 100` |
+
+Chạy tuần tự, không có việc khác song song. Một lượt trước đó có chạy song song các lượt dò ngôn ngữ thì `e2e.js` còn 45/52 và `can_e2e.js` dừng giữa chừng. Lượt chạy riêng đều đạt, nhưng nguyên nhân của lần lỗi đó chưa được xác nhận trực tiếp. Hai test này có thể chưa ổn định khi máy bận.
+
+### Lỗi trang tải lại liên tục khi chọn tiếng Anh
+
+- **Triệu chứng đo được:** 82 lượt điều hướng trong 6 giây ở trang chủ, 101 ở `/cap-nhat/`, `/choi/` kẹt ở màn hình tải.
+- **Nguyên nhân:** game gốc tải lại trang để server đọc cookie `vkl_lang` và trả HTML tiếng Anh. Site tĩnh luôn trả HTML có `en: false`, nên điều kiện tải lại không bao giờ hết. Lỗi có sẵn từ khi chạy bản tĩnh, cũng có trên trang Pages cho tới khi `play/` mới được đẩy lên.
+- **Cách sửa:** điểm vá trong `build_mod.py` bỏ lệnh tải lại đó. Các hàm dịch và từ điển của game chạy ở client nên chữ vẫn đổi.
+- **Cái giá còn lại:** mỗi lần mở trang bằng tiếng Anh, React báo lỗi hydrate #418 trong console rồi tự vẽ lại, vì HTML tĩnh là tiếng Việt. Có thể thấy tiếng Việt thoáng qua trước khi trang đổi. Không thấy ảnh hưởng tới lối chơi trong test.
+- **Chữ còn chưa dịch:** nhãn tốc độ "nhanh" trên màn hình đầu thai (có từ game gốc). Trong bảng của mod, các tab đã quét chỉ còn tên riêng (người, tông, gia tộc).
+
+### Mô phỏng
+
+6 cấu hình, 100 kiếp mỗi cấu hình và 100 kiếp đối chứng tắt các hệ thống 3.0. Bot không phải chiến lược tối ưu, không có trận thời gian thực. `tài khoản` khoảng 65 KB ở cuối lượt.
+
+| Cấu hình | ≥Trúc Cơ | ≥Kim Đan | ≥Nguyên Anh | ≥Hóa Thần | Tuổi thọ TB |
+|---|---:|---:|---:|---:|---:|
+| Cân bằng | 85 (78) | 74 (68) | 65 (46) | 45 (22) | 211 (150) |
+| Ổn định | 81 (84) | 77 (80) | 59 (58) | 43 (25) | 198 (167) |
+| Cưỡng ép | 86 (83) | 74 (76) | 48 (53) | 25 (19) | 147 (164) |
+| Xoay trọng tâm | 54 (60) | 46 (50) | 39 (30) | 24 (12) | 126 (105) |
+| Tà đạo liều lĩnh | 83 (81) | 67 (72) | 27 (48) | 6 (25) | 61 (87) |
+| Luyện đan | 19 (17) | 1 (7) | 1 (1) | 0 (0) | 36 (38) |
+
+Số trong ngoặc là đối chứng. Chênh dưới khoảng 10 điểm ở 100 kiếp là nhiễu.
+
+**Cân bằng chưa đạt:**
+
+- Cân bằng và Ổn định tới Hóa Thần nhiều gần gấp đôi đối chứng, tuổi thọ Cân bằng tăng 61 năm. Các hệ thống mới đang làm game dễ hơn ở giữa và cuối đời.
+- Tà đạo liều lĩnh tụt mạnh: Nguyên Anh 27% so với 48%, Hóa Thần 6% so với 25%, tuổi thọ 61 so với 87. Nguyên nhân chết hàng đầu là tâm ma phản phệ và thiên kiếp. Chưa xác định phần do hệ tâm ma, phần do bot chọn đường liều.
+- Số lần chuyển động của từng hệ thống có trong lượt chạy, nên các hệ thống đều được dùng thật: 334 lượt vào bí cảnh, 201 bí thuật, 188 pháp bảo, 190 đồ đệ, 197 di sản tìm lại, 23 Thiên Mệnh, 12 kết cục Thiên Mệnh. `thuanTheo=0` ở Cân bằng là do bot không chọn nhánh đó.
+
+### Lỗi kiểm thử tìm ra và đã sửa
+
+| Lỗi | Cách sửa |
+|---|---|
+| Thiên Mệnh bị `rollFate` ghi đè | `setFate` đánh dấu đã gieo |
+| Sổ Thiên Đạo ra `NaN` khi trừ ô chưa có giá trị (mô phỏng phát hiện) | Mặc định 0, có test |
+| Quái bí cảnh quá mạnh ở tầng đầu | Tính lại từ `combatLevel` |
+| Người cũ được nhận lại mỗi đời | Ghi `seen` theo tài khoản |
+| Test: bấm khi nút còn `arming`, nút góp bị khóa vì thiếu linh thạch, so đạo niệm đúng từng số | Sửa trong test, game không sai |
+
+### Chưa kiểm chứng
+
+- **Trang Pages thật:** bản 3.0 đầy đủ chưa được chạy trên github.io vì chưa commit.
+- **Người chơi thật:** chưa ai chơi các hệ thống này. Mọi số cân bằng đến từ bot.
+- **Trận thời gian thực:** chỉ nhận chỉ số, không nhận cơ chế của pháp bảo, phù, pháp tắc.
+- **Tiếng Anh:** mới kiểm tra đổi ngôn ngữ, vào game, thời gian trôi, tải lại và các tab ở nhân vật mới. Chưa kiểm tra văn bản sự kiện 3.0 và các tab khi đã có đủ dữ liệu bằng tiếng Anh.
+- **Điện thoại thật, Safari:** chưa thử.
+
 ## 3.0-GĐ1: căn cơ (09/11/2026)
 
 Bản local, Edge headless, Node 24.15.
@@ -51,7 +145,7 @@ Cách đọc: 100 kiếp có sai số lớn, chênh dưới khoảng 10 điểm 
 - **Đạo cơ trong game thật** được test bằng cách đặt cảnh giới rồi bấm giao diện. Đột phá thật được chạy trong mô phỏng, chưa có test giao diện cho đúng lượt đột phá đó.
 - **Chiến lược chọn trong mô phỏng** là chiến lược máy, không phải người chơi. Chưa ai chơi một mạch tới Phi Thăng với căn cơ.
 - **Phi thăng và cảnh giới Tiên:** rất ít kiếp mô phỏng tới Độ Kiếp, chưa có kiếp nào được xác nhận đi qua phi thăng cùng căn cơ.
-- **Chưa chạy:** giao diện tiếng Anh, điện thoại thật, Safari. Bản `play/` đã dựng nhưng chưa deploy lên Pages thật.
+- **Chưa chạy:** giao diện tiếng Anh, điện thoại thật, Safari. GĐ1 đã có trên Pages, nhưng ở đó mới xác minh tệp có mặt.
 
 Ngày chạy: 09/11/2026 · Node 24.15 · Microsoft Edge headless · Bản dựng: `site-mod/`
 

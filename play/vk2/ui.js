@@ -13,6 +13,8 @@
   let lastHtml = "";
   let modal = null; // { tab } khi bảng đang mở
   let wasRunning = null;
+  let builder = null; // Hàm dựng sự kiện của game (nD), nhận từ bản vá
+  let testAcct = null; // Mô phỏng dùng tài khoản riêng, không đụng save thật
   const toastSeen = new Set();
   let toastLife = null;
   let flashTimer = 0;
@@ -38,6 +40,7 @@
   }
 
   function acct() {
+    if (testAcct) return testAcct;
     const key = storeKey();
     if (acctCache && acctKey === key) return syncMeta(acctCache);
     let saved = null;
@@ -54,6 +57,7 @@
     if (m) {
       a.lives = m.lives ?? 0;
       a.lore = m.lore?.length ?? 0;
+      a.mv = { p: m.phucDuyen ?? 0, n: m.nghiep ?? 0, k: m.kiepSo ?? 0, h: m.hon?.v ?? 0, e: Object.keys(m.endings ?? {}).length, d: m.noDrink ?? 0 };
     }
     return a;
   }
@@ -68,6 +72,9 @@
       lastSavedAcct = s;
     } catch {}
   }
+
+  // Nhân vật được game lưu khi rời trang, nên tài khoản phải lưu cùng lúc, nếu không sự kiện đang chờ sẽ trỏ tới một thế giới cũ hơn nó.
+  globalThis.addEventListener?.("pagehide", saveAcct);
 
   const char = () => bridge?.charRef?.current ?? null;
 
@@ -179,6 +186,12 @@
       ["main", T("Chính tuyến", "Main story")],
       ["realm", T("Chuẩn bị đột phá", "Breakthrough preparation")],
       ["can", T("Căn cơ", "Foundation")],
+      ["dao", T("Ngộ đạo và cơ duyên", "Insight and fortunes")],
+      ["khi", T("Luyện khí và động phủ", "Crafting and abode")],
+      ["the", T("Sư đồ, gia tộc, tông môn", "Mentors, clans, sects")],
+      ["phap", T("Tâm ma và Đại Đạo", "Demons and the Dao")],
+      ["menh", T("Thiên Mệnh và nhân quả", "Destiny and karma")],
+      ["su", T("Thiên Hạ Ký Sự", "World Chronicle")],
       ["talent", T("Thiên phú", "Talents")],
       ["daily", T("Hằng ngày", "Daily")],
       ["life", T("Luân hồi (qua nhiều kiếp)", "Samsara (across lives)")],
@@ -399,6 +412,7 @@
       [T("Thể chất", "Body"), L(K.bodyOf(c).n)],
       [T("Kinh mạch", "Meridians"), `${can.open}/${K.meridianCap(c)}`],
       [T("Trận thắng", "Wins"), fmt(j.kills)],
+      ...EXT.facts.flatMap((f) => f(c, a) ?? []),
     ];
     const active = c.vk2.active.map((id) => `${L(C.talentDef.get(id).n)} ${T("bậc", "rank")} ${c.vk2.talents[id].lv}`);
     const time = j.activities.length
@@ -451,15 +465,33 @@
 
   const PATH_NAMES = { kiem: ["Kiếm", "Sword"], dan: ["Đan", "Alchemy"], tran: ["Trận", "Array"], phat: ["Phật", "Buddhist"], ma: ["Ma", "Demon"], yeu: ["Yêu", "Beast"] };
 
+  const TAB_NAMES = { journey: ["Hành Trình", "Journey"], can: ["Căn Cơ", "Base"], talents: ["Thiên phú", "Talents"], root: ["Linh căn", "Root"] };
+  const GROUPS = [
+    { n: ["Hành trình", "Journey"], tabs: ["journey", "chronicle"] },
+    { n: ["Nhiệm vụ", "Quests"], tabs: ["quests"] },
+    { n: ["Tu luyện", "Practice"], tabs: ["can", "art", "talents", "root"] },
+    { n: ["Cơ duyên", "Fortunes"], tabs: ["realm", "inherit"] },
+    { n: ["Sản nghiệp", "Estate"], tabs: ["cave", "forge"] },
+    { n: ["Nhân thế", "World"], tabs: ["mentor", "family", "sect", "people"] },
+    { n: ["Thiên cơ", "Fate"], tabs: ["law", "heart", "crisis", "destiny", "karma"] },
+  ];
+  // Các mục của bản 3.0 đăng ký ở ui3.js.
+  const EXT = { tabs: {}, actions: {}, facts: [] };
+
   function modalHtml(c, a, now) {
     const tab = modal.tab;
-    const tabs = [["journey", T("Hành trình", "Journey")], ["quests", T("Nhiệm vụ", "Quests")], ["can", T("Căn Cơ", "Base")], ["talents", T("Thiên phú", "Talents")], ["root", T("Linh căn", "Root")]];
-    const body = tab === "journey" ? journeyHtml(c, a, now) : tab === "can" ? canHtml(c, a) : tab === "talents" ? talentsHtml(c, a) : tab === "root" ? rootHtml(c) : journalHtml(c, a, now);
+    const ext = EXT.tabs[tab];
+    const body = ext ? ext.html(c, a, now) : tab === "journey" ? journeyHtml(c, a, now) : tab === "can" ? canHtml(c, a) : tab === "talents" ? talentsHtml(c, a) : tab === "root" ? rootHtml(c) : journalHtml(c, a, now);
+    // Nhóm chức năng theo danh mục: hàng trên là danh mục, hàng dưới là các mục của danh mục đang mở.
+    const group = GROUPS.find((g) => g.tabs.includes(tab)) ?? GROUPS[0];
+    const tabName = (k) => L(EXT.tabs[k]?.n ?? TAB_NAMES[k] ?? [k, k]);
+    const realTabs = (g) => g.tabs.filter((k) => EXT.tabs[k] || TAB_NAMES[k] || g.tabs.length === 1);
     return `<div class="vk2-sheet" role="dialog" aria-modal="true">
       <div class="vk2-sheet-head">
-        <div class="vk2-tabs" role="tablist">${tabs.map(([k, n]) => `<button role="tab" aria-selected="${k === tab}" class="${k === tab ? "on" : ""}" data-act="tab" data-tab="${k}">${esc(n)}</button>`).join("")}</div>
+        <div class="vk2-tabs" role="tablist">${GROUPS.filter((g) => realTabs(g).length).map((g) => `<button role="tab" aria-selected="${g === group}" class="${g === group ? "on" : ""}" data-act="tab" data-tab="${realTabs(g)[0]}">${esc(L(g.n))}</button>`).join("")}</div>
         <button class="vk2-x" data-act="close" aria-label="${T("Đóng", "Close")}">✕</button>
       </div>
+      ${realTabs(group).length > 1 ? `<div class="vk2-subtabs" role="tablist">${realTabs(group).map((k) => `<button role="tab" aria-selected="${k === tab}" class="${k === tab ? "on" : ""}" data-act="tab" data-tab="${k}">${esc(tabName(k))}</button>`).join("")}</div>` : ""}
       <div class="vk2-sheet-body">${body}</div></div>`;
   }
 
@@ -658,6 +690,8 @@
         if (K.usePill(c, a, id)) toast(`${L(K.PILL_USES[id].n)}: ${L(K.PILL_USES[id].d)}`, "good");
         commit();
         break;
+      default:
+        EXT.actions[b.dataset.act]?.(c, a, b);
     }
   }
 
@@ -729,9 +763,24 @@
     captureOmen(fn) {
       K.captureOmen(fn);
     },
+    captureCombat(nd, nr) {
+      C.captureCombat(nd, nr);
+    },
     onYear: safe((c, opts) => {
-      pushNotes(c, K.onYear(c, acct(), opts));
+      pushNotes(c, C.onYear(c, acct(), opts));
     }),
+    yearEvent: safe((c, opts, nD) => {
+      builder = nD;
+      const def = C.yearEvent(c, acct(), opts);
+      return def ? nD(c, def) : null;
+    }, null),
+    chainEvent: safe((c, nD) => {
+      builder = nD;
+      const def = C.chainEvent(c, acct());
+      return def ? nD(c, def) : null;
+    }, null),
+    eventDef: safe((c, id) => C.eventDef(c, acct(), id), null),
+    onChoice: safe((c, ev, choice) => globalThis.VK2Su?.onChoice(c, acct(), ev, choice)),
     cultMul: safe((c) => {
       return C.cultMul(c);
     }, 1),
@@ -741,7 +790,18 @@
       C.onKill(c, acct());
     }),
     step,
-    _test: { acct, char, core: C, can: K, game: () => bridge?.game ?? null, render: () => render(true), rate: (c) => (nM ? nM(c) : null) },
+    _test: { acct, char, core: C, can: K, game: () => bridge?.game ?? null, render: () => render(true), rate: (c) => (nM ? nM(c) : null), useAcct: (a) => (testAcct = a) },
+    // Dành cho ui3.js: dùng chung cách vẽ và lưu, không có API thứ hai.
+    _ui: {
+      EXT, L, T, esc, fmt, meter, toast, commit, pushNotes, closeModal: () => closeModalIfAny(), fxText, rewardText, FX_NAMES,
+      /** Đưa ngay sự kiện kế tiếp của mod vào hàng đợi của game, ví dụ khi bấm vào bí cảnh trong bảng. */
+      startChain(c, a) {
+        const def = C.chainEvent(c, a);
+        if (def && builder && bridge?.pendingRef) bridge.pendingRef.current = builder(c, def);
+        return !!def && !!builder;
+      },
+      canStartChain: () => !!builder && !!bridge?.pendingRef,
+    },
   };
 
   function boot() {

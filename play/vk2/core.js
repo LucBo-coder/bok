@@ -11,6 +11,150 @@
   const MAX_HISTORY = 30; // Số kiếp gần nhất giữ trong sổ luân hồi
   const FOCUS_COUNTERS = { tu_luyen: "y_tu_luyen", du_ngoan: "y_du_ngoan", kiem_tien: "y_kiem_tien", ket_duyen: "y_ket_duyen", luyen_dan: "y_luyen_dan", tru_yeu: "y_tru_yeu" };
 
+  // ---------- Khung module của bản 3.0 ----------
+  //
+  // Một module có thể cung cấp: ensure, onYear, tick, fx, cultFactor, insight, metric, QUESTS + kind, duel, onBump, breakUse,
+  // nextEvent (sự kiện năm), chain (sự kiện nhiều bước), eventDef (tra lại theo id khi tải lại), onDeath, summary.
+  // Sự kiện của module có id bắt đầu bằng "vk2_", đi qua đúng hàng đợi kỳ ngộ của game.
+  const mods = [];
+  let modsOff = false;
+  const register = (m) => mods.push(m);
+  const active = () => (modsOff ? [] : mods);
+  const setModsOff = (off) => {
+    modsOff = !!off;
+  };
+  const MOD_CAP = { atk: 0.4, def: 0.4, hp: 0.3, cult: 0.12, brk: 0.03 };
+  const EVENT_GAP = 4; // Mod nhường chỗ cho kỳ ngộ gốc: giữa hai sự kiện năm của mod phải cách tối thiểu số năm này
+
+  const clamp = (x, lo, hi) => Math.max(lo, Math.min(hi, x));
+  /** Số trong [0,1) xác định theo nhân vật, năm và loại việc, nên tải lại trang không đổi được kết quả. */
+  const rnd = (c, year, salt) => hash32(hash32((c.lookSeed ?? 0) + Math.imul(year + 1, 73856093)) + Math.imul(salt, 19349663)) / 4294967296;
+  const yearOf = (c) => Math.floor(c.age ?? 0);
+  const tr = (pair) => {
+    if (!Array.isArray(pair)) return pair;
+    try {
+      return globalThis.localStorage?.getItem("vkl.lang") === "en" ? pair[1] : pair[0];
+    } catch {
+      return pair[0];
+    }
+  };
+  const addStat = (c, key, n) => {
+    if (c.stats) c.stats[key] = clamp((c.stats[key] ?? 0) + n, 0, 100);
+  };
+
+  // Chỉ số và cấp thật do bản vá nd cung cấp. Khi chạy kiểm thử Node thì dùng công thức cùng dạng.
+  const combat = { nd: null, nr: null };
+  const captureCombat = (nd, nr) => {
+    combat.nd = nd;
+    combat.nr = nr;
+  };
+  const combatLevel = (c) => (combat.nr ? combat.nr(c) : (c.realm ?? 0) * 9 + (c.layer ?? 0));
+  function combatStats(c) {
+    if (combat.nd) return combat.nd(c);
+    const k = Math.pow(1.15, combatLevel(c));
+    return statMul(c, { hp: 125 * k, atk: 15 * k, def: 4 * k });
+  }
+  /** Tổng hợp cơ chế chiến đấu từ các module: đánh thêm, hút máu, né, xuyên giáp, hộ thể, thiêu đốt. */
+  function duelMods(c) {
+    const out = { extra: 0, leech: 0, dodge: 0, pierce: 0, shield: 0, burn: 0, first: 0 };
+    for (const m of active()) {
+      for (const [k, x] of Object.entries(m.duel?.(c) ?? {})) out[k] = (out[k] ?? 0) + x;
+    }
+    out.extra = Math.min(out.extra, 0.6);
+    out.leech = Math.min(out.leech, 0.4);
+    out.dodge = Math.min(out.dodge, 0.35);
+    out.pierce = Math.min(out.pierce, 0.7);
+    out.shield = Math.min(out.shield, 0.5);
+    return out;
+  }
+  /**
+   * Trận theo lượt với công thức sát thương của game: 12% trượt, 15% chí mạng ×2, trừ nửa phòng thủ. Quái dùng hệ số 115/13,8/4 như game.
+   * hpFrac là phần máu còn lại khi vào trận, nên trận trước ảnh hưởng trận sau. Kết quả xác định theo seed.
+   */
+  function duel(c, foeLv, foeMul, seed, hpFrac = 1) {
+    const me = combatStats(c);
+    const k = Math.pow(1.15, foeLv) * (foeMul ?? 1);
+    const fx = duelMods(c);
+    let foe = { hp: 115 * k, atk: 13.8 * k, def: 4 * k };
+    let hp = me.hp * clamp(hpFrac, 0.01, 1);
+    let shield = me.hp * fx.shield;
+    let s = hash32(seed | 0);
+    const r = () => (s = hash32(s + 1)) / 4294967296;
+    const hit = (atk, def) => {
+      if (r() < 0.12) return 0;
+      return Math.max(1, Math.round(atk * (0.7 + 0.6 * r()) * (r() < 0.15 ? 2 : 1) - 0.5 * def));
+    };
+    let turns = 0;
+    const strike = () => {
+      const d = hit(me.atk, foe.def * (1 - fx.pierce));
+      foe.hp -= d;
+      if (fx.leech) hp = Math.min(me.hp, hp + d * fx.leech);
+      if (fx.burn) foe.hp -= me.atk * fx.burn;
+    };
+    if (fx.first > 0 && r() < fx.first) strike();
+    while (turns < 40 && hp > 0 && foe.hp > 0) {
+      turns++;
+      strike();
+      if (r() < fx.extra) strike();
+      if (foe.hp <= 0) break;
+      if (r() >= fx.dodge) {
+        let d = hit(foe.atk, me.def);
+        const absorbed = Math.min(shield, d);
+        shield -= absorbed;
+        d -= absorbed;
+        hp -= d;
+      }
+    }
+    return { win: foe.hp <= 0 && hp > 0, hp: clamp(hp / me.hp, 0, 1), turns };
+  }
+
+  /** Sự kiện năm của module. Mỗi lần chỉ một sự kiện, và cách nhau đủ xa để không lấn kỳ ngộ gốc. */
+  function yearEvent(c, acct, opts) {
+    if (c.dead || (c.age ?? 0) < 6) return null;
+    const v = ensure(c, acct);
+    const year = yearOf(c);
+    if (c.cosmos) {
+      if (opts?.closed || year - (v.evAt ?? -99) < EVENT_GAP) return null;
+      for (const m of active()) {
+        const def = m.cosmosEvent?.(c, acct);
+        if (def) return (v.evAt = year), def;
+      }
+      return null;
+    }
+    for (const m of active()) {
+      const urgent = m.urgentEvent?.(c, acct, opts);
+      if (urgent) return (v.evAt = year), urgent;
+    }
+    if (opts?.closed || year - (v.evAt ?? -99) < EVENT_GAP) return null;
+    for (const m of active()) {
+      const def = m.nextEvent?.(c, acct, opts);
+      if (def) return (v.evAt = year), def;
+    }
+    return null;
+  }
+  function chainEvent(c, acct) {
+    if (c.dead) return null;
+    for (const m of active()) {
+      const def = m.chain?.(c, acct);
+      if (def) return def;
+    }
+    return null;
+  }
+  function eventDef(c, acct, id) {
+    if (typeof id !== "string" || !id.startsWith("vk2_")) return null;
+    for (const m of mods) {
+      const def = m.eventDef?.(c, acct, id);
+      if (def) return def;
+    }
+    return null;
+  }
+  /** Gọi đúng một lần mỗi năm từ vòng lặp gốc. */
+  function onYear(c, acct, opts) {
+    const notes = [...(root.VK2Can?.onYear(c, acct, opts) ?? [])];
+    for (const m of active()) notes.push(...(m.onYear?.(c, acct, opts) ?? []));
+    return notes;
+  }
+
   function newAcct() {
     return { v: 1, c: {}, claimed: {}, book: {}, deaths: 0, maxRealm: 0, seenDead: 0, daily: null, history: [] };
   }
@@ -83,7 +227,12 @@
       default: {
         if (name.startsWith("path_")) return c.path === name.slice(5) ? 1 : 0;
         const can = root.VK2Can?.metric(name, c);
-        return can !== undefined ? can : v?.c?.[name] ?? 0;
+        if (can !== undefined) return can;
+        for (const m of mods) {
+          const x = m.metric?.(name, c, acct);
+          if (x !== undefined) return x;
+        }
+        return v?.c?.[name] ?? 0;
       }
     }
   }
@@ -102,7 +251,7 @@
   function addXp(c, id, n) {
     const t = c.vk2.talents[id];
     if (!t || !c.vk2.active.includes(id) || t.lv >= 5) return;
-    const mul = (rootInfo(c).affine ? D.AFFINITY.xpMul : 1) * (root.VK2Can?.insight(c) ?? 1);
+    const mul = (rootInfo(c).affine ? D.AFFINITY.xpMul : 1) * (root.VK2Can?.insight(c) ?? 1) * active().reduce((s, m) => s * (m.insight?.(c) ?? 1), 1);
     t.xp =Math.min(talentThreshold(talentDef.get(id), t.lv), t.xp + n * mul);
   }
 
@@ -119,6 +268,7 @@
       if (w) addXp(c, id, w * n);
     }
     root.VK2Can?.onBump(c, name, n);
+    for (const m of active()) m.onBump?.(c, acct, name, n);
   }
 
   function canAwaken(def, c, acct) {
@@ -218,6 +368,18 @@
       }
     }
     for (const fx of root.VK2Can?.fx(c) ?? []) add(fx);
+    // Các hệ thống 3.0 cộng chung có trần riêng, nên chơi đủ mọi hệ thống cũng không vượt khỏi đường cân bằng của game.
+    const mod = { atk: 0, def: 0, hp: 0, cult: 0, brk: 0 };
+    for (const m of active()) {
+      for (const fx of m.fx?.(c) ?? []) {
+        for (const [k, x] of Object.entries(fx)) {
+          if (!(k in mod)) continue;
+          if (x >= 0) mod[k] += x;
+          else neg[k] += x;
+        }
+      }
+    }
+    for (const k of Object.keys(mod)) pos[k] += Math.min(mod[k], MOD_CAP[k]);
     const out = {};
     for (const k of Object.keys(pos)) out[k] = softcap(pos[k], D.SOFTCAP[k]) + neg[k];
     return out;
@@ -232,8 +394,8 @@
     return n * D.PREP_BONUS;
   }
 
-  const cultMul = (c) => Math.max(0.1, 1 + totals(c).cult) * (root.VK2Can?.cultFactor(c) ?? 1);
-  const breakBonus = (c) => totals(c).brk + prepBonus(c);
+  const cultMul = (c) => Math.max(0.1, 1 + totals(c).cult) * (root.VK2Can?.cultFactor(c) ?? 1) * active().reduce((s, m) => s * (m.cultFactor?.(c) ?? 1), 1);
+  const breakBonus = (c) => totals(c).brk + prepBonus(c) + active().reduce((s, m) => s + (m.breakExtra?.(c) ?? 0), 0);
   function statMul(c, s) {
     const t = totals(c);
     return { hp: s.hp * Math.max(0.1, 1 + t.hp), atk: s.atk * Math.max(0.1, 1 + t.atk), def: s.def * Math.max(0.1, 1 + t.def) };
@@ -292,6 +454,13 @@
       const locked = !!q.after && !v.claimed[q.after];
       out.push({ ...q, kind: "can", cur: Math.min(cur, q.goal[1]), need: q.goal[1], status: statusOf(cur, q.goal[1], v.claimed[q.id], locked) });
     }
+    for (const m of mods) {
+      for (const q of (typeof m.QUESTS === "function" ? m.QUESTS(c, acct) : m.QUESTS) ?? []) {
+        const cur = metric(q.goal[0], c, acct);
+        const locked = !!q.after && !v.claimed[q.after];
+        out.push({ ...q, kind: m.kind, cur: Math.min(cur, q.goal[1]), need: q.goal[1], status: statusOf(cur, q.goal[1], v.claimed[q.id], locked) });
+      }
+    }
     for (const id of v.active) {
       const t = v.talents[id];
       const def = talentDef.get(id);
@@ -327,7 +496,7 @@
   /** Tối đa 3 nhiệm vụ theo dõi: ưu tiên đã ghim, kế đến việc chờ nhận thưởng, rồi theo độ ưu tiên từng loại. */
   function tracked(list, pins = [], max = 3) {
     const open = list.filter((q) => q.status === "active" || q.status === "complete");
-    const rank = { main: 0, talent: 1, realm: 2, can: 2.5, daily: 3, life: 4 };
+    const rank = { menh: 0.5, main: 0, talent: 1, realm: 2, can: 2.5, dao: 2.6, khi: 2.7, the: 2.8, phap: 2.9, daily: 3, life: 4 };
     const score = (q) => (pins.includes(q.id) ? -100 : 0) + (q.status === "complete" ? -10 : 0) + rank[q.kind];
     return open
       .map((q, i) => [score(q), i, q])
@@ -347,6 +516,7 @@
     }
     if (r.txp) for (const id of c.vk2?.active ?? []) addXp(c, id, r.txp);
     if (r.phuc) ctx?.addPhuc?.(r.phuc);
+    for (const m of mods) m.applyReward?.(c, r);
   }
 
   /** Nhận thưởng. Đánh dấu đã nhận trước khi phát thưởng, nên chỉ có tác dụng đúng một lần. */
@@ -398,7 +568,8 @@
     if ((c.realm ?? 0) > (acct.maxRealm ?? 0)) acct.maxRealm = c.realm;
     if ((c.qf?.revenge ?? 0) > (acct.c.revenge ?? 0)) acct.c.revenge = c.qf.revenge;
     const woken = c.dead ? [] : checkAwaken(c, acct);
-    const notes = root.VK2Can?.tick(c, acct) ?? [];
+    const notes = [...(root.VK2Can?.tick(c, acct) ?? [])];
+    for (const m of active()) notes.push(...(m.tick?.(c, acct) ?? []));
     const died = c.dead && recordDeath(c, acct);
     return { woken, died, notes };
   }
@@ -410,6 +581,8 @@
     acct.seenDead = life;
     acct.deaths = (acct.deaths ?? 0) + 1;
     for (const [id, t] of Object.entries(c.vk2?.talents ?? {})) acct.book[id] = Math.max(acct.book[id] ?? 0, t.lv);
+    const legacy = {};
+    for (const m of active()) Object.assign(legacy, m.onDeath?.(c, acct) ?? {});
     acct.history = [
       ...(acct.history ?? []),
       {
@@ -417,6 +590,7 @@
         cause: typeof c.cause === "string" ? c.cause : null, kills: c.vk2?.c?.kills ?? 0,
         talents: Object.entries(c.vk2?.talents ?? {}).map(([id, t]) => [id, t.lv]),
         can: root.VK2Can?.summary(c) ?? null,
+        legacy,
       },
     ].slice(-MAX_HISTORY);
     return true;
@@ -466,5 +640,7 @@
     newAcct, normAcct, ensure, rootInfo, metric, bump, onKill, tick, listQuests, tracked, claim, togglePin,
     checkAwaken, canAwaken, setActive, canLevelUp, needsBranch, levelUp, chooseBranch, talentFx, talentThreshold,
     journey, logEntries, totals, softcap, cultMul, breakBonus, statMul, prepBonus, dayKey, ensureDaily, talentDef,
+    MOD_CAP, register, mods, setModsOff, onYear, yearEvent, chainEvent, eventDef, captureCombat, combatLevel, combatStats, duelMods, duel,
+    kit: { clamp, hash32, rnd, yearOf, tr, addStat },
   };
 })(typeof globalThis !== "undefined" ? globalThis : this);

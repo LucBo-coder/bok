@@ -1,5 +1,6 @@
 // Mô phỏng nhiều kiếp bằng logic thật của game: hàm một năm (O.f), hàm áp lựa chọn (O.x), hàm tạo nhân vật (O.n).
-// Có đối chứng: cùng số kiếp nhưng tắt căn cơ, để đo căn cơ làm lệch nhịp game bao nhiêu.
+// Có đối chứng: cùng số kiếp nhưng tắt toàn bộ phần 3.0, để đo các hệ thống mới làm lệch nhịp game bao nhiêu.
+// Máy chơi các hệ thống 3.0 bằng đúng hàm của giao diện (hàm bot), và tài khoản đi xuyên suốt các kiếp để đo cả di sản.
 //
 // Cần server: `python serve_mod.py`, Edge đã cài.
 // Dùng: NODE_PATH=<thư mục có playwright-core> node vk2/tests/sim.js [số kiếp mỗi cấu hình]
@@ -30,6 +31,7 @@ async function runInPage({ cfg, lives, baseline, seed }) {
   const hook = globalThis.__VK2;
   if (baseline) {
     // Tắt riêng phần căn cơ: thay các hàm tính bằng giá trị trung tính, giữ nguyên VK2 2.0.
+    C.setModsOff(true);
     K.__off = { fx: K.fx, cultFactor: K.cultFactor, insight: K.insight, onYear: K.onYear, tick: K.tick };
     K.fx = () => [];
     K.cultFactor = () => 1;
@@ -41,14 +43,17 @@ async function runInPage({ cfg, lives, baseline, seed }) {
   const rng = () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296);
   const meta = { lives: 0, talents: [], nghiep: 0, huyetMach: [], phucDuyen: 0 };
   const acct = C.newAcct();
-  const out = { lives: 0, realms: {}, ages: [], lifespans: [], stuck: 0, errors: [], bad: [], causes: {}, bodies: {}, dao: {}, dan: {}, method: cfg.method, chosenForge: 0, firstOpen3: [], ageR2: [], ageR3: [], ageR4: [], ageR5: [], maxYears: 0, breakFails: 0 };
+  T.useAcct(acct);
+  const out = { stats: {}, lives: 0, realms: {}, ages: [], lifespans: [], stuck: 0, errors: [], bad: [], causes: {}, bodies: {}, dao: {}, dan: {}, method: cfg.method, chosenForge: 0, firstOpen3: [], ageR2: [], ageR3: [], ageR4: [], ageR5: [], maxYears: 0, breakFails: 0 };
   const focuses = ["tu_luyen", "du_ngoan", "kiem_tien", "luyen_dan", "tu_luyen", "ket_duyen"];
 
   const pick = (ev, c) => {
     const list = typeof ev.choices === "function" ? ev.choices(c) : ev.choices;
     if (!list?.length) return -1;
-    const idx = list.map((x, i) => [x, i]).filter(([x]) => !x.when || x.when(c));
+    const idx = list.map((x, i) => [x, i]).filter(([x]) => (!x.when || x.when(c)) && !x.off);
+    if (!idx.length) return -1;
     const by = (lean) => idx.find(([x]) => x.lean === lean);
+    if (String(ev.id).startsWith("vk2_")) return globalThis.__simBot.pick(ev, c, acct, cfg, rng, idx);
     // Người chơi tới được bước đột phá thì thường sẽ thử. "Củng cố" chỉ hoãn, chọn mãi sẽ kẹt nhân vật ở một cảnh giới.
     if (ev.id === "__dot_pha" && cfg.choice !== "random") {
       const tryIt = idx.filter(([x]) => !/Củng cố|Consolidate|Chưa|Thôi/i.test(String(x.label)));
@@ -82,7 +87,7 @@ async function runInPage({ cfg, lives, baseline, seed }) {
         else c.focus = age >= 12 || cfg.focus === "tu_luyen" ? cfg.focus : "tu_luyen";
         const ctx = O.v(c, ctxLog);
         let ev = O.f(c, ctx, { talents: [] });
-        K.tick(c, acct);
+        C.tick(c, acct, 0);
         let chain = 0;
         while (ev && !c.dead) {
           if (++chain > 40) {
@@ -93,7 +98,31 @@ async function runInPage({ cfg, lives, baseline, seed }) {
           const i = pick(ev, c);
           if (i < 0) break;
           ev = O.x(c, ev, i, O.v(c, ctxLog), []);
-          K.tick(c, acct);
+          C.tick(c, acct, 0);
+        }
+        if (!baseline && !c.dead) {
+          const chained = globalThis.__simBot.act(c, acct, cfg, rng, out);
+          // Thao tác của người chơi có thể mở sự kiện nhiều bước, như vào bí cảnh
+          if (chained) {
+            let guard = 0;
+            const first = C.chainEvent(c, acct);
+            let cur = first ? { id: first.id, seed: 0, title: first.title, text: first.text(c), choices: first.choices(c, 0).map((x) => ({ label: x.label, hint: x.hint, lean: x.lean, ...(x.off ? { off: true } : {}) })) } : null;
+            while (cur && !c.dead) {
+              if (++guard > 40) {
+                out.stuck++;
+                out.bad.push(`chuỗi bí cảnh không dứt: ${cur.id}`);
+                break;
+              }
+              const i = pick(cur, c);
+              if (i < 0) {
+                out.bad.push(`sự kiện không còn lựa chọn: ${cur.id}`);
+                break;
+              }
+              cur = O.x(c, cur, i, O.v(c, ctxLog), []);
+              C.tick(c, acct, 0);
+            }
+          }
+          globalThis.__simBot.check(c, acct, out, age);
         }
         // Người chơi có chủ đích thì chọn cách đúc; cấu hình "random" để mặc cho quá hạn.
         if (!baseline && c.vk2?.can?.pending) {
@@ -144,6 +173,8 @@ async function runInPage({ cfg, lives, baseline, seed }) {
     out.ages.push(Math.floor(c.age));
     out.lifespans.push(c.lifespan);
     out.maxYears = Math.max(out.maxYears, yearsThisLife);
+    C.tick(c, acct, 0);
+    if (!baseline) globalThis.__simBot.collect(c, acct, out);
     const cause = String(c.cause ?? "?").slice(0, 48);
     out.causes[cause] = (out.causes[cause] ?? 0) + 1;
     if (!baseline) {
@@ -153,7 +184,15 @@ async function runInPage({ cfg, lives, baseline, seed }) {
       if (can.kimDan) out.dan[can.kimDan.grade] = (out.dan[can.kimDan.grade] ?? 0) + 1;
     }
   }
-  if (baseline) Object.assign(K, K.__off);
+  if (baseline) {
+    Object.assign(K, K.__off);
+    C.setModsOff(false);
+  }
+  T.useAcct(null);
+  out.acctSize = JSON.stringify(acct).length;
+  for (const k of ["worldYear", "worldNpc", "worldSects", "worldGone", "maxNpcRealm", "crisisPast", "legacyItems", "legacyUsed", "debt"]) out[k] = out.stats[k] ?? out[k];
+  out.stats.worldYear = undefined;
+  delete out.stats.worldYear;
   out.bad = [...new Set(out.bad)].slice(0, 12);
   out.errors = [...new Set(out.errors)].slice(0, 12);
   return out;
@@ -179,13 +218,16 @@ const high = (r, min) => Math.round((Object.entries(r.realms).filter(([k]) => Nu
   }
   if (!(await page.evaluate(() => !!globalThis.__VK2?._test?.game?.()))) throw new Error("Không vào được game");
   await page.evaluate(() => [...document.querySelectorAll("button")].find((x) => x.textContent.trim() === "❚❚")?.click());
+  await page.addScriptTag({ path: require("node:path").join(__dirname, "simbot.js") });
 
+  const results = [];
   let totalBad = 0;
   let totalLives = 0;
   for (const [i, cfg] of CONFIGS.entries()) {
     const seed = 1000 + i * 77;
     const r = await page.evaluate(runInPage, { cfg, lives: LIVES, baseline: false, seed });
     const b = await page.evaluate(runInPage, { cfg, lives: LIVES, baseline: true, seed });
+    results.push(r);
     totalBad += r.bad.length + r.errors.length + r.stuck;
     totalLives += r.lives + b.lives;
     console.log(`\n=== ${cfg.name} (${r.lives} kiếp, đối chứng ${b.lives})`);
@@ -197,11 +239,21 @@ const high = (r, min) => Math.round((Object.entries(r.realms).filter(([k]) => Nu
     console.log(`  3 kinh mạch đầu: TB tuổi ${avg(r.firstOpen3)} (${r.firstOpen3.length} kiếp đạt)`);
     console.log(`  thể chất       : ${JSON.stringify(r.bodies)}`);
     console.log(`  đạo cơ/Kim Đan : ${pct(r.dao, r.lives)} | ${pct(r.dan, r.lives)} (chủ động đúc ${r.chosenForge})`);
+    console.log(`  3.0            : ${Object.entries(r.stats).sort((x, y) => x[0].localeCompare(y[0])).map(([k, x]) => `${k}=${typeof x === "number" ? Math.round(x * 10) / 10 : x}`).join(" ")} · acct ${Math.round(r.acctSize / 1024)}KB`);
+    console.log(`  thế giới       : năm ${r.worldYear}, ${r.worldNpc} NPC, ${r.worldSects} tông, ${r.worldGone} tông đã mất, đại biến ${r.crisisPast}, NPC cao nhất ${r.maxNpcRealm}; di sản ${r.legacyUsed}/${r.legacyItems} đã tìm, nợ ${r.debt}; Thiên Mệnh ${JSON.stringify(r.fates ?? {})}`);
     console.log(`  chết nhiều nhất: ${Object.entries(r.causes).sort((x, y) => y[1] - x[1]).slice(0, 3).map(([k, x]) => `${x}× ${k}`).join(" | ")}`);
     if (r.errors.length) console.log(`  LỖI: ${r.errors.join(" || ")}`);
     if (b.errors.length) console.log(`  LỖI đối chứng: ${b.errors.join(" || ")}`);
     if (r.bad.length) console.log(`  VI PHẠM: ${r.bad.join(" || ")}`);
     if (r.stuck) console.log(`  KẸT: ${r.stuck}`);
+  }
+  {
+    const Su = await page.evaluate(() => ({ ev: [...globalThis.VK2Su.events.keys()], ch: [...globalThis.VK2Su.chains.values()].flatMap((d) => d.stages.filter((s) => s.end).map((s) => `${d.id}:${s.id}`)) }));
+    const seen = new Set(results.flatMap((r) => Object.keys(r.suSeen ?? {})));
+    const ends = new Set(results.flatMap((r) => Object.keys(r.suEnds ?? {})));
+    console.log(`Sự kiện đã kích hoạt: ${Su.ev.filter((x) => seen.has(x)).length}/${Su.ev.length}. Chưa gặp: ${Su.ev.filter((x) => !seen.has(x)).join(", ") || "không"}`);
+    console.log(`Kết cục chuỗi đã xảy ra: ${Su.ch.filter((x) => ends.has(x)).length}/${Su.ch.length}. Chưa gặp: ${Su.ch.filter((x) => !ends.has(x)).join(", ") || "không"}`);
+    console.log(`Tài khoản lớn nhất: ${Math.max(...results.map((r) => r.acctKB ?? 0))} KB. Linh thạch lớn nhất cuối kiếp: ${Math.max(...results.map((r) => r.maxStones ?? 0))}`);
   }
   console.log(`\nTổng: ${totalLives} kiếp, ${totalBad} lỗi hoặc vi phạm bất biến, ${pageErrors.length} lỗi trang`);
   if (pageErrors.length) console.log([...new Set(pageErrors)].slice(0, 8).join("\n"));

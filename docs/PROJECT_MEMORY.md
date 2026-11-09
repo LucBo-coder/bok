@@ -35,7 +35,8 @@ Export của `O` trong chunk `2weh91tpivddk`: `O.f` một năm (`nP`), `O.x` áp
 ```powershell
 python build_mod.py   # Git Bash trên Windows: thêm PYTHONIOENCODING=utf-8, nếu không dòng in cuối sẽ báo lỗi mã hóa dù bản dựng đã xong
 python serve_mod.py   # http://127.0.0.1:8766/choi/
-node --test vk2/tests/core.test.js vk2/tests/can.test.js
+node --test vk2/tests/core.test.js vk2/tests/can.test.js vk2/tests/dao.test.js vk2/tests/khi.test.js vk2/tests/the.test.js vk2/tests/phap.test.js vk2/tests/menh.test.js
+node vk2/tests/v3_e2e.js    # Các hệ thống 3.0 trong game thật, cần server và playwright-core
 node vk2/tests/sim.js 100   # Mô phỏng trên logic game thật, cần server và playwright-core
 ```
 
@@ -60,3 +61,26 @@ Save nằm trong localStorage (`vkl.save`, `vkl.meta`, `vk2.acct.guest`). Game t
 ## Cách site được đăng (09/11/2026)
 
 Pages đang ở chế độ deploy từ gốc nhánh `main`, nên bản dựng được commit vào `play/` với `--base /bok/play`. Sau mỗi thay đổi ở `vk2/` hoặc `site/` phải chạy `python build_mod.py --base /bok/play --out play` rồi commit; `check.yml` báo lỗi nếu quên. `404.html` ở gốc chuyển mọi đường dẫn lạ vào game. Bản chạy local vẫn dựng vào `site-mod/`, không có tiền tố.
+
+## Module 3.0 (09/11/2026)
+
+- `build_mod.py` có 12 điểm vá và `MODULES = ("dao", "khi", "the", "phap", "menh", "su", "su_tale", "su_tale2", "su_chain")`. Thêm module thì thêm tên vào đây.
+- `TEXT_EDITS` đổi lời giới thiệu trên trang, thay trong HTML, chunk và `i18n-dict.json`, và dừng build nếu không tìm thấy chuỗi gốc.
+- **Viết module:** gọi `C.register(api)`. Có thể cung cấp `ensure, onYear, tick, fx, duel, insight, metric, QUESTS + kind, onBump, urgentEvent, nextEvent, chain, eventDef, onDeath, applyReward, summary, breakExtra, cultFactor`.
+- **Viết sự kiện:** id bắt đầu `vk2_`, định nghĩa `{ id, title, text: () => str, choices: (c, seed) => [{ label, hint, lean, off?, run: (n, e) => str }] }`. Phải dựng lại được từ `eventDef` chỉ với nhân vật và tài khoản, vì người chơi có thể tải lại trang khi sự kiện đang mở. Các sự kiện `nextEvent` cách nhau tối thiểu `EVENT_GAP` 4 năm (`v.evAt`).
+- **Sức mạnh cộng thêm** phải đi qua `fx`, tổng bị kẹp bởi `C.MOD_CAP` trong `totals`. Đừng cộng thẳng vào chỉ số.
+- **Cấp chiến đấu:** chênh một cấp đổi kết quả rất mạnh (đo: thắng 85% ở cùng cấp, 10% ở +2). Quái của mod phải tính từ `combatLevel`, không đoán con số.
+- `fx` không nhận `acct`, nên hiệu ứng từ thế giới được `refresh` chép vào nhân vật (`h.fx`).
+- Trận thời gian thực của game chỉ đọc chỉ số. Cơ chế `duel` chỉ có tác dụng trong trận tự động của mod.
+- **Khi kiểm thử giao diện:** nút lựa chọn của game có trạng thái `arming` ngay khi popup vừa hiện, cú bấm lúc đó có thể bị bỏ qua. Test phải chờ kết quả của lựa chọn, không chờ việc thấy sự kiện.
+- Git Bash đổi `/bok/play` thành đường dẫn Windows: thêm `MSYS_NO_PATHCONV=1` khi chạy build, nếu không build dừng ở kiểm tra `--base`.
+- **Ngôn ngữ trên site tĩnh:** không có server đọc cookie `vkl_lang`, nên HTML luôn là tiếng Việt và client tự đổi chữ. Lỗi hydrate #418 trong console khi mở bằng tiếng Anh là chuyện đã biết. `lang.js` bỏ qua đúng lỗi này và báo mọi lỗi khác. Nút chọn ngôn ngữ là `.lang-seg button`, có `role="radio"`.
+
+## Hệ thống sự kiện động (`vk2/su*.js`)
+- `su.js` là bộ máy: registry, lập lịch, resolver, chuỗi trong thế giới, mạch đời NPC, nhân quả, nhật ký. `su_tale.js`, `su_tale2.js` là sự kiện đơn và chuỗi, `su_chain.js` là chuỗi và mạch NPC.
+- Thêm sự kiện: `Su.define([{id,g,tier,when,t,x,c:[{l,r,fx,lean}],who?}])`. Khóa lạ trong `when` hoặc `fx` làm nạp lỗi ngay, không âm thầm bỏ qua.
+- Thêm chuỗi: `Su.defineChain([{id,g,tier,w,n,roles,sect?,stages}])`. Mỗi giai đoạn có `id,n,log,dur`, tùy chọn `ev` (hỏi người chơi), `br` (nhánh), `wfx` (hậu quả thế giới), `end`. Cần ít nhất 2 kết cục.
+- `c.cosmos` của game là chuỗi `"tien"`, `"hu"`, `"ma"`, không phải boolean. Đặt `true` làm vòng năm đứng yên.
+- `acct.mv` và `acct.lore` chỉ được đồng bộ trong game thật (`syncMeta`), mô phỏng trình duyệt không có. Vì vậy sự kiện theo Phúc duyên, Nghiệp, Kiếp Số, kết cục, Thiên thư được kiểm ở `su.test.js`.
+- Thiên tượng theo ngày thật, nên một lượt `sim.js` chỉ gặp thiên tượng của hôm đó.
+- Tài khoản giờ được lưu cả khi `pagehide`, cùng lúc game lưu nhân vật. Trước đó có thể lệch tới 5 giây.

@@ -408,7 +408,8 @@ async function enterGame(page) {
     for (let i = 0; i < 6; i++) V.onKill(c);
   });
   await sleep(900);
-  await page.locator('#vk2-modal [data-tab="talents"]').click();
+  await page.locator('#vk2-modal .vk2-tabs [data-tab="can"]').click();
+  await page.locator('#vk2-modal .vk2-subtabs [data-tab="talents"]').click();
   await sleep(200);
   let st = await snap();
   check("Kiếm Tâm thức tỉnh từ số trận thắng thật", !!st.v.talents.kiem_tam, JSON.stringify(st.v.talents.kiem_tam ?? null));
@@ -433,7 +434,7 @@ async function enterGame(page) {
   check("thăng bậc từ UI hoạt động", st.v.talents.kiem_tam.lv === 2, `lv=${st.v.talents.kiem_tam.lv}`);
   check("thăng bậc làm tăng chỉ số", (await atkOf()) > atk0);
 
-  await page.locator('#vk2-modal [data-tab="root"]').click();
+  await page.locator('#vk2-modal .vk2-subtabs [data-tab="root"]').click();
   await sleep(200);
   await page.screenshot({ path: path.join(OUT, "05-root.png") });
   check("tab linh căn hiển thị hệ", (await page.locator("#vk2-modal .vk2-el.has").count()) >= 1);
