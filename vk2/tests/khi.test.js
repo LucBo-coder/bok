@@ -400,3 +400,23 @@ test("lá phù chiến đấu tiêu hao khi trận thật bắt đầu, và vẫ
   C.fightFoe(c, next, { def: 10 });
   assert.ok(next.vk2.burn < 0.12, "trận sau không còn");
 });
+
+test("trận thật mài pháp bảo đang mang, bản mệnh mòn chậm hơn, vỡ thì ghi nhật ký", () => {
+  const [c] = mk({ realm: 3, layer: 2 });
+  const k = c.vk2.khi;
+  k.items.push({ id: "pb1", kind: "kiem", q: 1, lv: 0, dur: 0.5, spirit: false, el: "kim", name: "Kiếm thử" });
+  k.items.push({ id: "pb2", kind: "giap", q: 1, lv: 0, dur: 40, spirit: false, el: "tho", name: "Giáp thử" });
+  k.items.push({ id: "pb3", kind: "an", q: 1, lv: 0, dur: 40, spirit: false, el: "tho", name: "Ấn cất" });
+  k.worn = ["pb1", "pb2"];
+  k.natal = "pb2";
+  C.fightFoe(c, { pMax: 1000 }, { def: 10 });
+  C.fightFoe(c, { pMax: 1000 }, { def: 10 });
+  assert.equal(Q.itemOf(k, "pb1").dur, 0);
+  assert.equal(Q.itemOf(k, "pb2").dur, 40 - 2 * Q.REAL_WEAR * 0.5);
+  assert.equal(Q.itemOf(k, "pb3").dur, 40, "đồ cất trong túi không mòn");
+  assert.equal(c.log.filter((e) => /Kiếm thử vỡ/.test(e.text)).length, 1, "chỉ báo một lần khi vỡ");
+  const f = { pMax: 1000 };
+  C.fightFoe(c, f, { def: 10 });
+  C.fightFoe(c, f, { def: 10 });
+  assert.equal(Q.itemOf(k, "pb2").dur, 40 - 3 * Q.REAL_WEAR * 0.5, "một trận nhiều lượt chỉ mài một lần");
+});

@@ -782,9 +782,23 @@
   // ---------- Vòng cập nhật ----------
 
   /** Ghi chú căn cơ vào nhật ký gốc của game và báo cho người chơi. */
+  /** Thức tỉnh có màn riêng: chữ lớn giữa màn hình và cột sáng trên nhân vật. Không chặn thao tác. */
+  function awaken(title, name) {
+    try {
+      globalThis.VK2Fx?.awaken?.();
+      document.querySelector(".vk2-awaken")?.remove();
+      const box = document.createElement("div");
+      box.className = "vk2-awaken";
+      box.setAttribute("aria-hidden", "true");
+      box.innerHTML = `<small>${esc(title)}</small><b>${esc(name)}</b>`;
+      document.body.appendChild(box);
+      setTimeout(() => box.remove(), 2600);
+    } catch {}
+  }
   function pushNotes(c, notes) {
     for (const n of notes ?? []) {
       const text = L(n.t);
+      if (n.awake) awaken(T("Thức tỉnh", "Awakening"), text.replace(/^[^:]*:\s*/, "").replace(/\.$/, ""));
       c.log?.push({ age: Math.floor(c.age ?? 0), tone: n.kind === "big" ? "big" : n.kind === "bad" ? "bad" : "good", text });
       toast(text, n.kind === "big" ? "awake" : n.kind === "bad" ? "" : "good");
     }
@@ -801,6 +815,7 @@
       for (const id of woken) {
         const def = C.talentDef.get(id);
         toast(`${T("Thức tỉnh thiên phú", "Talent awakened")}: ${L(def.n)}`, "awake");
+        awaken(T("Thức tỉnh thiên phú", "Talent awakened"), L(def.n));
         c.log.push({ age: Math.floor(c.age), tone: "big", text: `${T("Thức tỉnh thiên phú", "Talent awakened")}: ${L(def.n)}.` });
       }
       // Lần quét đầu của mỗi kiếp chỉ ghi nhận: tải lại trang không được báo lại việc đã xong từ trước.

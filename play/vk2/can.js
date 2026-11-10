@@ -29,6 +29,8 @@
   };
 
   const MERIDIANS = { regular: 12, extra: 8, total: 20 };
+  /** Phần nội thương tự lành mỗi năm khi đang tu (phần trăm của mức hiện tại). */
+  const INJURY_HEAL = 0.03;
   const GRADES = {
     1: { n: ["Hạ phẩm", "Low grade"], cls: "q1" },
     2: { n: ["Trung phẩm", "Mid grade"], cls: "q2" },
@@ -401,6 +403,8 @@
       can.stability += m.stab;
       can.impurity += m.imp >= 0 ? m.imp * impMul : m.imp;
       can.injury += m.inj >= 0 ? m.inj * injMul : m.inj * healMul;
+      // Thân thể vẫn tự lành một phần mỗi năm, nên nội thương có điểm dừng thay vì cộng dồn tới chết khi tu Cưỡng ép lâu dài.
+      can.injury -= can.injury * INJURY_HEAL * healMul;
 
       if (m.incident > 0) {
         const risk = m.incident + can.injury / 800 - can.stability / 2000;
@@ -613,7 +617,7 @@
     const body = checkBody(c, acct);
     if (body) {
       const def = bodyDef.get(body);
-      notes.push({ kind: "big", t: [`Thức tỉnh thể chất: ${def.n[0]}.`, `Body awakened: ${def.n[1]}.`] });
+      notes.push({ kind: "big", awake: true, t: [`Thức tỉnh thể chất: ${def.n[0]}.`, `Body awakened: ${def.n[1]}.`] });
     }
     return notes;
   }

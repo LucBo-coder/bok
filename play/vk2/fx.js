@@ -691,6 +691,19 @@
     }
     g.globalAlpha = 1;
   }
+  /** Thức tỉnh thiên phú, thể chất hay huyết mạch: cột sáng đỏ vàng bốc lên từ chân nhân vật, hai vòng sóng. */
+  function awaken() {
+    stats.awaken = (stats.awaken ?? 0) + 1;
+    if (amount() <= 0 || reduced() || !st.sprite) return;
+    const { x, y, h } = st.sprite;
+    flash = Math.max(flash, 0.6);
+    flashColor = "#ffd0a0";
+    rings.push({ x, y: y - h / 2, r: 2, v: 70, life: 0, max: 0.9, c: "#ff8a5a" });
+    rings.push({ x, y: y - h / 2, r: 1, v: 38, life: 0, max: 1.1, c: "#ffe9a8" });
+    for (let i = 0; i < Math.round(30 * Math.max(0.5, amount())) && parts.length < MAX_PARTICLES; i++) {
+      parts.push({ x: x + rnd(-6, 6), y: y - rnd(0, 4), vx: rnd(-4, 4), vy: -rnd(30, 70), g: -6, life: 0, max: rnd(0.8, 1.5), c: Math.random() < 0.5 ? "#ffd36b" : "#ff7a4a", s: Math.random() < 0.3 ? 2 : 1 });
+    }
+  }
   /** Vừa rời màn đầu thai: một quầng sáng ở chỗ nhân vật sinh ra. */
   function born() {
     stats.born++;
@@ -833,6 +846,6 @@
   EXT.actions["gfx-level"] = (c, a, b) => setLevel(b.dataset.id);
 
   document.documentElement.classList.toggle("vk2g-on", level !== "off");
-  root.VK2Fx = { setLevel, level: () => level, stats: () => ({ ...stats, flash, particles: parts.length, auto, pixel: PIXEL, W, H }), debug, breakthrough };
+  root.VK2Fx = { setLevel, level: () => level, stats: () => ({ ...stats, flash, particles: parts.length, auto, pixel: PIXEL, W, H }), debug, breakthrough, awaken };
   root.requestAnimationFrame(frame);
 })(typeof globalThis !== "undefined" ? globalThis : this);

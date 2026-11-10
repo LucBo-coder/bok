@@ -47,6 +47,11 @@ PATCHES = {
         ('(0,D.Z)("Cực phẩm","Supreme")],U={ao:', '(0,D.Z)("Cực phẩm","Supreme"),(0,D.Z)("Tuyệt phẩm","Peerless")],U={ao:'),
         ('(0,D.Z)("Cực phẩm","Supreme")];function en(', '(0,D.Z)("Cực phẩm","Supreme"),(0,D.Z)("Tuyệt phẩm","Peerless")];function en('),
         ('(0,a.Z)("Cực phẩm","Supreme")],P=e=>', '(0,a.Z)("Cực phẩm","Supreme"),(0,a.Z)("Tuyệt phẩm","Peerless")],P=e=>'),
+        # Lưới đồ trong Túi đồ: lọc theo Phàm giới hoặc Thiên giới (vk2/tui.js). Nút bán đồ thừa vẫn tính trên cả túi.
+        (
+            'E="dan"===j?[]:"all"===j?A:A.filter(e=>e.slot===j)',
+            f'E=("dan"===j?[]:"all"===j?A:A.filter(e=>e.slot===j)).filter(e=>!{HOOK}||!{HOOK}.bagShow||{HOOK}.bagShow(e))',
+        ),
     ],
     "0pcagq3015zh_.js": [
         # Trang bị Tuyệt phẩm: thêm vào bảng đồ thật, nhãn và hệ số giá của phẩm thứ 5
@@ -182,6 +187,7 @@ def game_tags(base):
         + "".join(f'<script src="{base}/vk2/{m}.js"></script>' for m in MODULES)
         + f'<script src="{base}/vk2/ui.js"></script>'
         f'<script src="{base}/vk2/ui3.js"></script>'
+        f'<script src="{base}/vk2/tui.js"></script>'
         f'<script src="{base}/vk2/fx.js"></script>'
     )
 

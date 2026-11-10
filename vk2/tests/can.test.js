@@ -486,3 +486,15 @@ test("trần kinh mạch và đan điền luôn đúng, kể cả khi cảnh gi�
   live(c, a, 2);
   assert.ok(c.vk2.can.dantian <= K.dantianCap(c));
 });
+
+test("tu Cưỡng ép lâu dài: nội thương có điểm dừng, không tự cộng tới chết", () => {
+  const [c, a] = fresh({ realm: 3, layer: 1, age: 40, focus: "tu_luyen" });
+  K.setMethod(c, a, "cuong");
+  c.vk2.can.stability = 50;
+  for (let i = 0; i < 300; i++) {
+    c.age += 1;
+    K.onYear(c, a);
+  }
+  assert.ok(c.vk2.can.injury < 70, `nội thương ${c.vk2.can.injury}`);
+  assert.ok(c.vk2.can.injury > 5, "vẫn còn thương: Cưỡng ép có cái giá");
+});

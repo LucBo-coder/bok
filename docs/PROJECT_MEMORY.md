@@ -106,3 +106,11 @@ Pages đang ở chế độ deploy từ gốc nhánh `main`, nên bản dựng �
 - Thú dùng sheet gốc trong `site/lpc/beasts`, đổi màu bằng `filter`. Hệ của thú được game suy từ id, nên đặt id phải để ý các mẫu trong hàm `nt`.
 - id trong bảng đồ, bảng thú và bảng quái có thể đụng nhau: `kim_thiem` đã là quái của game, nên thú mới là `kim_tien_thiem`.
 - Game cũng có sự kiện thú với lời mời "Giao chiến thu phục"; test phải nhận sự kiện của mod theo tên thú.
+
+## Túi đồ và cân bằng (10/11/2026)
+- `vk2/tui.js` nạp sau `ui3.js`. Bộ lọc giới đi qua điểm vá biến `E` (lưới đồ) trong chunk `41koe_jam6mot`, gọi `__VK2.bagShow(item)`. Biến `A` (cả túi) giữ nguyên, nên nút bán đồ thừa và "Túi trống" của game không đổi.
+- Thiên giới là `minRealm >= 8` (Chân Tiên). Trang bị nhanh dùng `C.combatStats`, tức hàm `nd` thật, chỉ có sau khi game đã gọi `nd` một lần (mở Túi đồ là đủ).
+- Chỉ số mod có vào game qua bản vá `nd`. Người chơi thấy "không ăn" thường vì tổng của các module bị kẹp ở `MOD_CAP` rồi qua softcap (`D.SOFTCAP`), nên con số in trên từng món của mod lớn hơn phần thật. Túi đồ hiện phần thật.
+- Trận thời gian thực gọi `onRealFight(c, f)` của module đúng một lần mỗi trận (trong `fightOf`). `khi.js` dùng nó để mài pháp bảo.
+- Ghi chú có `awake: true` hiện màn thức tỉnh (`ui.js` `awaken`, `VK2Fx.awaken`).
+- Nội thương tự lành `INJURY_HEAL` mỗi năm khi tu. "Thuận theo" tâm ma chỉ +3 tâm ma.

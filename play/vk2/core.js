@@ -119,6 +119,7 @@
     const m = duelMods(c);
     f.vk2 = { ...m, pool: Math.round((f.pMax ?? 0) * m.shield), opened: false, bonus: 0 };
     for (const x of active()) x.onFightStart?.(c);
+    for (const x of active()) x.onRealFight?.(c, f); // Chỉ trận thời gian thực của game, không gồm trận tự động trong bí cảnh
     return f.vk2;
   }
   const fightFoe = (c, f, foe) => {

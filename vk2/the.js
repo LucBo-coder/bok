@@ -850,7 +850,7 @@
       if (fam.land) c.linhThach = (c.linhThach ?? 0) + fam.land * 4;
       if (fam.blood && root.VK2Dao && !c.vk2.dao?.blood && (c.realm ?? 0) >= 2 && rnd(c, year, 75) < 0.015) {
         c.vk2.dao.blood = fam.blood;
-        notes.push({ kind: "big", t: ["Huyết mạch gia tộc thức tỉnh trong người bạn.", "Your clan's bloodline awakens in you."] });
+        notes.push({ kind: "big", awake: true, t: ["Huyết mạch gia tộc thức tỉnh trong người bạn.", "Your clan's bloodline awakens in you."] });
       }
     }
     if (h.master) {

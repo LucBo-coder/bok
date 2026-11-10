@@ -165,3 +165,21 @@
 .bk-cell.r4 { background: #ffe6ee; border-color: #b02a5a; }
 .find-toast.r4 { border-color: #e0486a; }
 .vk2-peer.on { border-color: #b02a5a; }
+
+/* Túi đồ: chia Phàm giới / Thiên giới, trang bị nhanh (tui.js) */
+.vk2-bag { margin: 6px 0 8px; padding: 6px 8px; border: 1px dashed var(--muted); font-size: 13px; line-height: 1.35; }
+.vk2-bag-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 6px; }
+.vk2-world { font: inherit; font-size: 14px; font-weight: 600; min-height: 36px; padding: 4px 10px; border: 2px solid var(--ink); background: var(--paper-3); color: var(--ink); cursor: pointer; }
+.vk2-world small { opacity: .7; font-weight: 500; }
+.vk2-world.on { background: var(--ink); color: var(--paper); }
+.vk2-world[data-world="thien"].on { background: var(--gold); color: var(--ink-dark); }
+.vk2-quick small { font-weight: 500; opacity: .8; }
+.vk2-bag-hint { color: var(--muted); }
+.vk2-bag-mod { margin: 0; color: var(--muted); overflow-wrap: anywhere; }
+
+/* Màn thức tỉnh: chữ lớn giữa màn hình, tự mờ đi, không chặn bấm */
+.vk2-awaken { position: fixed; left: 50%; top: 38%; z-index: 9998; transform: translate(-50%, -50%); pointer-events: none; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 14px 26px; max-width: calc(100vw - 32px); text-align: center; color: #fff3dc; background: radial-gradient(ellipse at center, rgba(143, 47, 32, .92), rgba(59, 20, 12, .85) 70%, rgba(59, 20, 12, 0)); border-top: 2px solid var(--gold-l); border-bottom: 2px solid var(--gold-l); animation: vk2-awaken 2.6s ease-out forwards; }
+.vk2-awaken small { font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: var(--gold-l); }
+.vk2-awaken b { font-size: 28px; line-height: 1.15; text-shadow: 0 0 12px #ffb36b, 0 2px 0 #3b140c; overflow-wrap: anywhere; }
+@keyframes vk2-awaken { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.6); letter-spacing: 8px; } 15% { opacity: 1; transform: translate(-50%, -50%) scale(1.06); letter-spacing: 0; } 25% { transform: translate(-50%, -50%) scale(1); } 75% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -62%); } }
+@media (prefers-reduced-motion: reduce) { .vk2-awaken { animation: vk2-awaken-still 2.6s linear forwards; } @keyframes vk2-awaken-still { 0%, 80% { opacity: 1; } 100% { opacity: 0; } } }

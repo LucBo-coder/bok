@@ -78,7 +78,8 @@
             const q = x.vk2.phap;
             q.gaveIn = (q.gaveIn ?? 0) + 1;
             q.wounds[kind] = Math.floor(q.wounds[kind] * 0.5);
-            addStat(x, "tamMa", 8);
+            // Ma tu sống chung với tâm ma: cái giá nằm ở sổ nghiệp và tâm ma nhích dần, không phải bị nó quật ngã như khi đối mặt thất bại.
+            addStat(x, "tamMa", 3);
             root.VK2Dao?.addMastery(x, "ma_cong", 10);
             root.VK2Menh?.note?.(x, acct, "cam", 3);
             return tr(["Bạn để nó ở lại trong người, và thấy sức mạnh dâng lên. Cảm giác đó không hề xấu, và đó mới là điều đáng sợ.", "You let it stay, and feel power rise. It does not feel bad, and that is the frightening part."]);

@@ -50,7 +50,7 @@ Nguồn là bundle production đã minify, không có TypeScript, API server hay
 - [x] Sổ thiên phú qua kiếp, lợi thế khởi đầu có giới hạn
 - [ ] Cân bằng bằng chơi thật: mới là thông số khởi tạo
 - [ ] Thức tỉnh từ cơ duyên, bí cảnh, truyền thừa: cần GĐ4
-- [ ] Hiệu ứng thức tỉnh: mới có thông báo, chưa có animation riêng
+- [x] Hiệu ứng thức tỉnh: chữ lớn giữa màn hình và cột sáng trên nhân vật, cho thiên phú, thể chất và huyết mạch gia tộc
 
 ## Kế hoạch 3.0
 
@@ -124,10 +124,10 @@ Chủ dự án chốt ngày 09/11/2026: chỉ chạy local trên máy tính và 
 
 Nếu sau này muốn phát hành online: cần nối lại repo gốc (mod dựa trên 5 chuỗi minify của đúng một build) và làm RPC phía server (xem DATABASE_DESIGN.md).
 
-## Hệ thống sự kiện động: có code, có test, chờ commit
+## Hệ thống sự kiện động: xong (commit `1e78ce3`)
 - [x] GĐ1 Event Engine, GĐ2 Chuỗi, GĐ3 NPC và thế giới, GĐ4 Nhân quả và luân hồi, GĐ5 Nội dung, GĐ6 Giao diện và kiểm thử.
 - [x] 132 sự kiện đơn, 30 giai đoạn có lựa chọn, 22 chuỗi, 50 kết cục, 3 mạch đời NPC.
-- [ ] Cân bằng Tà đạo vẫn thấp hơn đối chứng, chưa xử lý.
+- [x] Cân bằng Tà đạo (10/11/2026): "Thuận theo" tâm ma +8 → +3. Mô phỏng: Hóa Thần 11% so với 18% đối chứng (trước: 5% so với 21%).
 
 ## Đồng bộ mod với game gốc (09/11/2026)
 
@@ -140,7 +140,7 @@ Trước đợt này, một số hệ thống hiện trên bảng của mod như
 - [x] Tông do mod tạo có phe thật trong game (danh xưng, thí luyện), không còn mặc định chính phái
 - [x] Hộ Thân Phù có tác dụng khi đột phá hỏng; lên tầng không còn làm mất phù đột phá
 - [x] Bảng Trừ yêu, Thông tin, Tàng Kinh Các, Túi đồ, Bế quan, Linh thú của game có mục nối sang hệ thống của mod
-- [ ] Trận thật chưa làm hao mòn pháp bảo; chỉ bí cảnh mới hao mòn
+- [x] Trận thật mài pháp bảo đang mang 0,25 độ bền mỗi trận (bản mệnh và pháp tắc Kim mòn chậm hơn); bí cảnh vẫn mài 1–3 mỗi trận
 - [ ] Cân bằng sau thay đổi này mới đo bằng mô phỏng công thức trận, chưa có người chơi thật
 
 ## Lớp đồ họa
@@ -159,3 +159,15 @@ Trước đợt này, một số hệ thống hiện trên bảng của mod như
 - [x] 8 linh thú (3 SR, 3 SSR, 2 SSS) trong bảng dị thú thật: sổ, trận thu phục, tiến hóa của game
 - [x] Bảng Tuyệt Phẩm ở nhóm Sản nghiệp, mục nối từ Túi đồ, 3 nhiệm vụ
 - [ ] Tốc độ kiếm tinh hoa và tỷ lệ gặp thú chưa được đo qua người chơi thật
+
+## Túi đồ: Phàm giới, Thiên giới, trang bị nhanh (10/11/2026)
+- [x] Lọc lưới đồ của game theo giới: Phàm giới là đồ yêu cầu Phàm Nhân tới Độ Kiếp, Thiên giới từ Chân Tiên trở lên. Lựa chọn được nhớ theo trình duyệt (`vk2.bagWorld`).
+- [x] Nút Trang bị nhanh: thử từng món trong túi bằng hàm chỉ số thật của game (`nd`), cộng tu luyện, bạo kích và thần thông, rồi mặc món tốt nhất cho mỗi ô trong giới đang xem.
+- [x] Dòng "Mod đang cộng" trong Túi đồ: phần trăm thật sau trần và softcap, cùng thần thông của đồ Tuyệt phẩm.
+- [x] Kiểm tra chỉ số mod có vào game không: Công trong Túi đồ từ 213 lên 255 khi mang 3 pháp bảo, tắt mod thì về 220. Chỉ số có vào game, nhưng bị trần `MOD_CAP` và softcap nên thường nhỏ hơn con số in trên từng món của mod.
+- [ ] Nút "Bán đồ thừa" của game vẫn tính trên cả túi, kể cả khi đang lọc một giới.
+
+## Cân bằng 10/11/2026 (mô phỏng 100 kiếp mỗi cấu hình)
+- [x] Nội thương tự lành 3% mức hiện tại mỗi năm khi tu, nên Cưỡng ép không còn cộng dồn tới chết. Cưỡng ép: Nguyên Anh 44% (đối chứng 54%), tuổi thọ 135 (174); trước sửa là 39% (59%), 118 (161).
+- [x] Cân bằng và Ổn định không còn gấp đôi đối chứng: Hóa Thần 42% (30%) và 37% (29%).
+- [ ] Cưỡng ép vẫn thất bại đột phá gần gấp đôi đối chứng (98 so với 50) và thọ ngắn hơn khoảng 40 năm. Có thể là đúng ý "rủi ro cao", cần người chơi thật đánh giá.

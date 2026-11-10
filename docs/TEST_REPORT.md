@@ -333,3 +333,26 @@ Test mới: `vk2/tests/bao.test.js` (10 bài logic) và `vk2/tests/gear_e2e.js` 
 Lỗi test bắt được khi xem ảnh: dòng chỉ số bị nhân 100 và có `undefined`, ô vũ khí không có hình, id `kim_thiem` trùng quái của game. Đã sửa cả ba.
 
 Giới hạn: mô phỏng 1200 kiếp không có bot đúc đồ, nên chưa đo tốc độ kiếm tinh hoa và tác động cân bằng. Xuyên giáp và hộ thể của đồ mới được kiểm tra đi vào `duelMods`, chỉ né được đo bằng chữ trong trận. Ảnh thú đã xem nhưng chưa có người chơi đánh giá.
+
+## Túi đồ, hao mòn pháp bảo, thức tỉnh, cân bằng (10/11/2026)
+
+| Bộ test | Kết quả |
+|---|---|
+| Logic Node (gồm `tui.test.js`) | 261/261 |
+| `v3_e2e` local | 66/66 |
+| `gear_e2e` local | 37/37 |
+| `sync` local | 36/36 |
+| `sim.js 100` (1200 kiếp) | 0 vi phạm, 0 lỗi trang |
+
+Kiểm tra trong game thật: lọc Phàm giới 6 món, Thiên giới 7 món đúng theo `minRealm`; Trang bị nhanh đổi 3 ô, Công trong Túi đồ 773 → 1530. Màn thức tỉnh hiện rồi tự tắt sau 2,6 giây.
+
+| Cấu hình | ≥Nguyên Anh | ≥Hóa Thần | Tuổi thọ TB |
+|---|---:|---:|---:|
+| Cân bằng | 61 (60) | 42 (30) | 187 (174) |
+| Ổn định | 49 (52) | 37 (29) | 157 (160) |
+| Cưỡng ép | 44 (54) | 26 (31) | 135 (174) |
+| Xoay trọng tâm | 26 (35) | 15 (9) | 107 (122) |
+| Tà đạo liều lĩnh | 25 (32) | 11 (18) | 63 (78) |
+| Luyện đan | 1 (0) | 0 (0) | 37 (39) |
+
+Số trong ngoặc là đối chứng. Chưa chạy: điện thoại thật, Safari, trang Pages thật.

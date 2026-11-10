@@ -566,6 +566,22 @@
     }
   }
   const onFightStart = afterFight;
+  /** Mỗi trận thật (săn quái, phục kích, đấu tay đôi) mài pháp bảo đang mang một chút; bí cảnh mài nặng hơn qua damageWorn. */
+  const REAL_WEAR = 0.25;
+  function onRealFight(c) {
+    const k = c.vk2?.khi;
+    if (!k?.worn.length) return;
+    const metal = (root.VK2Phap?.lawTier?.(c.vk2?.phap, "kim") ?? 0) > 0 ? 0.5 : 1;
+    for (const id of k.worn) {
+      const it = itemOf(k, id);
+      if (!it || it.dur <= 0) continue;
+      it.dur = Math.max(0, it.dur - REAL_WEAR * (k.natal === id ? 0.5 : 1) * metal);
+      if (it.dur > 0) continue;
+      const notes = [{ kind: "bad", t: [`${it.name} vỡ sau trận, cần sửa ở Luyện khí.`, `${it.name} broke in battle; repair it at the forge.`] }];
+      if (k.natal === id) natalBroken(c, notes);
+      for (const n of notes) c.log?.push({ age: Math.floor(c.age ?? 0), tone: "bad", text: tr(n.t) });
+    }
+  }
   function damageWorn(c, n) {
     const k = c.vk2?.khi;
     if (!k?.worn.length) return;
@@ -584,7 +600,7 @@
 
   const api = {
     kind: "khi", QUESTS, MATS, KINDS, QUAL, TALISMANS, SITES, BUILDINGS, ENHANCE_MAX, SPIRIT_LV, NATAL_REALM, HELD_MAX, BUILD_MAX, MAT_CAP, TALISMAN_CAP, NEGLECT_YEARS,
-    ensure, metric, fx, duel, onFightStart, onYear, tick, nextEvent, eventDef, onBump, addMat, hasMats, craftScore, canCraft, craft, wornSlots, itemOf, itemPower, toggleWorn, enhanceCost, enhance, repair, bindNatal,
+    ensure, metric, fx, duel, onFightStart, onRealFight, REAL_WEAR, onYear, tick, nextEvent, eventDef, onBump, addMat, hasMats, craftScore, canCraft, craft, wornSlots, itemOf, itemPower, toggleWorn, enhanceCost, enhance, repair, bindNatal,
     canDraw, draw, hasTalisman, useTalisman, arm, canFound, found, build, buildLv, buildCost, upkeep, storeArt, matPrice, buyMat, afterFight, damageWorn, summary, raidDef,
   };
   root.VK2Khi = api;
